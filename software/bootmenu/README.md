@@ -7,9 +7,9 @@
 
       1  INTERNAL DRIVE
       2  EXTERNAL DRIVE (DRIVE 2)
-      7  SLOT 7 CARD            (only if a card answers in slot 7)
       B  APPLESOFT BASIC
       M  MONITOR
+      7  SLOT 7 CARD            (only shown if a card answers in slot 7)
 
    HOLD B DURING RESET FOR THIS MENU
 ```
@@ -33,12 +33,24 @@ original board decodes it (`docs/free-space.md`).
   which `$C800` bank is selected.
 - **Choices:** 1 → `JMP $C600`. B and M call INIT, SETVID and SETKBD, then `$E000` (Applesoft) / `$FF69`
   (monitor). 7 → the ROM's own slot 7 start (`$00/$01 = $C700`, `JMP $C700`).
-- **External drive:**
-  - **2.7** has an unused drive-2 entry in its own boot code (`$C60D`: `ORA $C0EB`, skipped by a `BRA` from the
-    normal path; also in VTech's 860801/860915 firmware). The menu uses it.
-  - **2.9 / 3.0** rewrote the boot code without it, so the menu runs a RAM copy of the slot 6 boot page at
-    `$1200` (page-aligned, so branch timing matches the ROM) with `$C0EA → $C0EB` (drive 2), the window release
-    `$CFFF → $C600` (keep the slot 6 helper bank selected) and its three `JSR $C683` relocated.
+- **External drive (all versions):** the menu runs a RAM copy of the ROM's own slot 6 boot page at `$1200`
+  (page-aligned, so branch timing matches the ROM) with:
+  - `$C0EA → $C0EB` (drive 2);
+  - the window release `$CFFF → $C600` (keep the slot 6 helper bank selected);
+  - its own-page references relocated;
+  - its final `JMP $0801` sent to **FIXUP**.
+
+  The boot code's `$C800` helpers return to whatever page called them, so they work from the copy.
+- **FIXUP and ProDOS:** a ProDOS boot block saves X as the boot unit (`STX $43`) on each of its two entries; the
+  second comes from the ROM's sector routine, always with X = `$60` (drive 1). That's why ProDOS switched back to
+  the internal drive after loading started. When sector 0 is a ProDOS boot block (`38 B0 03 …` with `86 43` at
+  `$0807`), FIXUP sets `$43 = $E0` (slot 6, drive 2) and turns the `STX $43` into NOPs. ProDOS then loads and runs
+  from drive 2. Other boot sectors are left alone and get X = `$60` as usual.
+- **DOS 3.3** from drive 2: its first stage loads from drive 2, but DOS's own disk code then uses drive 1.
+  Fixing that would need a DOS-specific patch.
+- 2.7 also has an unused drive-2 entry in its own boot code (`$C60D`; also in VTech's 860801/860915). The menu
+  doesn't need it any more. On 2.7, a read error during a drive-2 boot makes the ROM retry from its normal boot
+  path, which uses drive 1.
 
 ## What to test (with a FloppyEmu or a second drive on the external port)
 1. Normal power-on and Ctrl-Reset without B: unchanged behaviour (boots / BASIC prompt).
@@ -46,9 +58,10 @@ original board decodes it (`docs/free-space.md`).
 3. B at power-on and B at Ctrl-Reset: menu appears.
 4. 1, B, M, and 7 with/without a slot 7 card.
 5. **2 with different disks**:
-   - Loaders that read through the boot ROM's sector routine (many single-load games) should run from drive 2.
-   - **DOS 3.3 and ProDOS** use their own drivers after the first stage and may switch to **drive 1**. Note what
-     each does; that tells us whether a fuller fix is worth it.
+   - **ProDOS** (8 1.x or 2.x) should now boot and stay on drive 2: check that `PREFIX` and `CAT` show the
+     external disk.
+   - Single-load disks that read through the boot ROM should run from drive 2.
+   - DOS 3.3 is expected to switch to drive 1 after its first stage.
 
 ## Build
 `python3 build.py` patches each ROM by byte pattern, checks that only the two hooks, the two gaps and the menu

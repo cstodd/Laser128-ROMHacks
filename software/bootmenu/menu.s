@@ -128,11 +128,11 @@ LINES:  .byte 3,8,S0-STRS
         .byte 4,8,S1-STRS
         .byte 7,6,S2-STRS
         .byte 9,6,S3-STRS
-        .byte 13,6,S4-STRS
-        .byte 15,6,S5-STRS
+        .byte 11,6,S4-STRS
+        .byte 13,6,S5-STRS
         .byte 20,3,S6-STRS
         .byte $FF
-L7:     .byte 11,6,S7-STRS
+L7:     .byte 15,6,S7-STRS
 
 STRS:
 S0:     .aschi "LASER 128 BOOT MENU"
@@ -152,5 +152,36 @@ S5:     .aschi "M  MONITOR"
 S6:     .aschi "HOLD B DURING RESET FOR THIS MENU"
         .byte 0
 
-; ---- external drive boot (filled in by build.py per ROM version)
+; ---- FIXUP: the RAM boot copy (drive 2) jumps here instead of $0801, with sector 0 at $0800, X = $60.
+; A ProDOS boot block ("38 B0 03 .. .. .. 86 43" = SEC / BCS / JMP / STX $43) saves X as the boot unit in $43 on
+; each of its two entries (the second from the ROM's sector routine, always X = $60). Make the unit $E0 (slot 6,
+; drive 2) and turn its STX $43 into NOPs, so ProDOS boots and stays on drive 2. Anything else is left alone.
+FIXUP:  PHP
+        PHA
+        LDA $0801
+        CMP #$38
+        BNE FX9
+        LDA $0802
+        CMP #$B0
+        BNE FX9
+        LDA $0803
+        CMP #$03
+        BNE FX9
+        LDA $0807
+        CMP #$86
+        BNE FX9
+        LDA $0808
+        CMP #$43
+        BNE FX9
+        LDA #$EA
+        STA $0807
+        STA $0808
+        TXA
+        ORA #$80
+        STA $43
+FX9:    PLA
+        PLP
+        JMP $0801
+
+; ---- external drive boot: RAM copy of this ROM's slot 6 boot page (filled in by build.py)
 {EXTBOOT}

@@ -8,8 +8,9 @@ Patches (located by byte pattern, not fixed addresses):
      BOOTSEL (gap at $FEE9): if B is still held, select the menu bank ($CFFF, $C600, $C200 -> chip $7800)
      and JMP $C800; otherwise do the LDA $C701 and carry on.
   3. chip $7800 (empty): copier.s at $C800, menu body at $C900, copied to $1000 and run from RAM.
-External drive: 2.7 enters its own unused drive-2 entry at $C60D; 2.9/3.0 run a relocated RAM copy of the
-slot 6 boot page with drive 2 selected ($C0EA -> $C0EB) and the window release ($CFFF) changed to a slot 6 select.
+External drive (all versions): a page-aligned, relocated RAM copy of the slot 6 boot page with drive 2 selected
+($C0EA -> $C0EB), the window release ($CFFF) changed to a slot 6 select, and the final JMP $0801 sent to FIXUP,
+which makes a ProDOS boot block use unit $E0 (slot 6, drive 2) so ProDOS stays on drive 2.
 """
 import os, re, sys, hashlib, zlib
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -26,29 +27,29 @@ cpu = lambda off: 0xC000 + off            # main bank: chip offset -> CPU addres
 def rel_target(rom, off):                 # target of a branch at chip offset off
     r = rom[off + 1]; return cpu(off) + 2 + (r - 256 if r > 127 else r)
 
-def boot_copy(rom, base):
-    """Relocated, drive-2 copy of the alternate slot 6 page (2.9/3.0) for RAM at base."""
+def boot_copy(rom, base, fixup):
+    """Drive-2 copy of the alternate slot 6 boot page for RAM at base (all versions):
+    $C0EA -> $C0EB (drive 2), $CFFF -> $C600 (keep the slot 6 helper bank selected instead of releasing it),
+    own-page references -> the copy, and the final JMP $0801 -> FIXUP."""
     page = bytearray(rom[0x4600:0x4700]); notes = []
     i = 0
     while i < 0x100:
         n, txt, md, w = dis1(rom, 0x4600 + i, 0x8000)
         if md in ('abs', 'abx', 'aby', 'ind') and i + n <= 0x100:
             new = None
-            if w == 0xC0EA: new = 0xC0EB                                   # drive 1 -> drive 2
-            elif w == 0xCFFF: new = 0xC600                                 # release -> select slot 6 bank
-            elif 0xC600 <= w <= 0xC6FF: new = base + (w - 0xC600)          # own page -> RAM copy
+            if w == 0xC0EA: new = 0xC0EB
+            elif w == 0xCFFF: new = 0xC600
+            elif 0xC600 <= w <= 0xC6FF: new = base + (w - 0xC600)
+            elif w == 0x0801 and txt.startswith('JMP'): new = fixup
             if new is not None:
                 page[i + 1], page[i + 2] = new & 0xFF, new >> 8
                 notes.append('$C6%02X %s -> $%04X' % (i, txt, new))
         i += n
+    assert any('JMP $0801' in x for x in notes) and any('$C0EA' in x for x in notes), notes
     return bytes(page), notes
 
-def extboot(ver, rom, base_guess, pad=0):
-    if ver == '2.7':
-        assert rom[0x4608:0x4610] == bytes.fromhex('0deac080030debc0'), '2.7 drive-2 entry'
-        return ('EXTBOOT: LDA $CFFF\n        LDY #0\n        LDX #3\n        STX $3C\n'
-                '        JMP $C60D       ; the ROM\'s own (unused) drive-2 entry\n'), None
-    page, notes = boot_copy(rom, base_guess)
+def extboot(rom, base, fixup, pad=0):
+    page, notes = boot_copy(rom, base, fixup)
     src = ('EXTBOOT: LDA $CFFF      ; clear the bank latches\n'
            '        LDA $C600       ; select the slot 6 bank for the boot code\'s $C800 helpers\n'
            '        JMP BOOT2\n')
@@ -60,15 +61,12 @@ def extboot(ver, rom, base_guess, pad=0):
 
 def build_body(ver, rom):
     tmpl = open(os.path.join(HERE, 'menu.s')).read().replace('{VERSION}', ver + ' + BOOT MENU')
-    src, _ = extboot(ver, rom, 0x1E00)
+    src, _ = extboot(rom, 0x1E00, 0x1000)                     # pass 1: sizes only
+    _, sym = asm65.assemble(tmpl.replace('{EXTBOOT}', src), BODY)
+    pad = (-sym['BOOT2']) & 0xFF; base = sym['BOOT2'] + pad    # pass 2: page-aligned copy, real FIXUP
+    src, notes = extboot(rom, base, sym['FIXUP'], pad)
     code, sym = asm65.assemble(tmpl.replace('{EXTBOOT}', src), BODY)
-    notes = None
-    if 'BOOT2' in sym:                                 # second pass: page-align BOOT2, then relocate to it
-        pad = (-sym['BOOT2']) & 0xFF
-        base = sym['BOOT2'] + pad
-        src, notes = extboot(ver, rom, base, pad)
-        code, sym2 = asm65.assemble(tmpl.replace('{EXTBOOT}', src), BODY)
-        assert sym2['BOOT2'] == base and base & 0xFF == 0; sym = sym2
+    assert sym['BOOT2'] == base and base & 0xFF == 0
     assert len(code) <= 0x600, 'menu body must fit $C900-$CEFF'
     return code, sym, notes
 
@@ -101,7 +99,7 @@ def patch(ver):
     rom[BANK:BANK + len(copier)] = copier
     rom[BANK + 0x100:BANK + 0x100 + len(body)] = body
     info = dict(key=cpu(k), p=p_target, m=m_target, cmp0d=cmp0d, s7=cpu(s7), keyx=len(keyx), sel=len(sel),
-                body=len(body), sym=sym, notes=notes)
+                body=len(body), sym=sym, notes=notes, body_bytes=body)
     return bytes(rom), orig, info
 
 class Machine(Sim):
@@ -146,18 +144,23 @@ def check(ver, rom, orig, info):
     try: w.run(start=0x1000, limit=300000)
     except RuntimeError as e: assert 'did not finish' in str(e)
     assert 'LASER 128 BOOT MENU' in scr(w, 3) and ver in scr(w, 4) and '2  EXTERNAL DRIVE' in scr(w, 9), scr(w, 3)
-    assert '7  SLOT 7' not in scr(w, 11)
+    assert '7  SLOT 7' not in scr(w, 15) and 'M  MONITOR' in scr(w, 13)
     m, pc = menu('b', stop={0xE000}); assert pc == 0xE000
     m, pc = menu('M', stop={0xFF69}); assert pc == 0xFF69
     m, pc = menu('7b', card=False, stop={0xC700, 0xE000}); assert pc == 0xE000, 'no card: 7 ignored'
     m, pc = menu('7', card=True, stop={0xC700}); assert pc == 0xC700 and m.main[0] == 0 and m.main[1] == 0xC7
-    if ver == '2.7':
-        m, pc = menu('2', stop={0xC60D}); assert pc == 0xC60D and m.x == 3 and m.y == 0 and m.main[0x3C] == 3
-    else:
-        b2 = info['sym']['BOOT2']
-        m, pc = menu('2', stop={b2}); assert pc == b2
-        assert [e[1] for e in m.io if e[1] in (0xCFFF, 0xC600)][-2:] == [0xCFFF, 0xC600]
-        assert bytes(m.main[b2:b2 + 256]) == boot_copy(orig, b2)[0]
+    b2, fx = info['sym']['BOOT2'], info['sym']['FIXUP']
+    m, pc = menu('2', stop={b2}); assert pc == b2
+    assert [e[1] for e in m.io if e[1] in (0xCFFF, 0xC600)][-2:] == [0xCFFF, 0xC600]
+    assert bytes(m.main[b2:b2 + 256]) == boot_copy(orig, b2, fx)[0]
+    # FIXUP: ProDOS boot block -> unit $E0 and STX $43 removed; other boot sectors untouched
+    prodos = bytes.fromhex('0138b0034c32a18643c903')
+    for sector, is_pd in ((prodos, True), (bytes.fromhex('01a527c909d018a52b'), False)):
+        m = Machine(rom); m.main[0x1000:0x1600] = info['body_bytes'][:0x600].ljust(0x600, b'\0')
+        m.main[0x0800:0x0800 + len(sector)] = sector; m.main[0x43] = 0x11; m.x = 0x60; m.y = 0x5A; m.c = True
+        assert m.run(start=fx, stop={0x0801}) == 0x0801 and m.x == 0x60 and m.y == 0x5A and m.c
+        if is_pd: assert m.main[0x43] == 0xE0 and m.main[0x807:0x809] == b'\xea\xea'
+        else: assert m.main[0x43] == 0x11 and bytes(m.main[0x800:0x800 + len(sector)]) == sector
 
 def main():
     out = os.path.join(ROOT, 'roms', 'bootmenu'); os.makedirs(out, exist_ok=True)

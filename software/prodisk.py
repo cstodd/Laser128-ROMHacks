@@ -137,12 +137,16 @@ def prodos_parts():
     f = read_files(img)
     return img[:1024], f['PRODOS'], f['BASIC.SYSTEM']
 
-def boot_image(volname, files, run):
-    """files: [(name, type, aux, data)]; run: the BIN file STARTUP will BRUN."""
+def boot_image(volname, files, run=None, startup=None, sys_first=()):
+    """Bootable disk: ProDOS 2.4 boot blocks, PRODOS, then sys_first (.SYSTEM files that must run before
+    BASIC.SYSTEM, e.g. a clock driver that chains to it), BASIC.SYSTEM, files, and a STARTUP program.
+    files and sys_first: [(name, type, aux, data)]. STARTUP is `BRUN run` if run is given, else the Applesoft
+    listing in startup (or none if both are None)."""
     boot, prodos, basic = prodos_parts()
-    startup = tokenize('10 PRINT CHR$(4)"BRUN %s"' % run)
-    allf = [('PRODOS', prodos[0], prodos[1], prodos[2]), ('BASIC.SYSTEM', basic[0], basic[1], basic[2])] + \
-           list(files) + [('STARTUP', 0xFC, 0x0801, startup)]
+    allf = [('PRODOS', prodos[0], prodos[1], prodos[2])] + list(sys_first) + \
+           [('BASIC.SYSTEM', basic[0], basic[1], basic[2])] + list(files)
+    if run: startup = '10 PRINT CHR$(4)"BRUN %s"' % run
+    if startup: allf.append(('STARTUP', 0xFC, 0x0801, tokenize(startup)))
     img = bytearray(mkdisk.build_image(volname, allf))
     img[:1024] = boot
     back = read_files(bytes(img))

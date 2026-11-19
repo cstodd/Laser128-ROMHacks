@@ -12,7 +12,7 @@ hypothesis**. They're consistent with the evidence below but need confirming fro
 | 3.3, 3.5 | **removed** | 2 (power-up key handler) | slot 6 | – | same | **New Laser 128** (redesigned gate array, VT27-0706-0 video ROM) |
 | 4.1, 4.2, 4.3, 4.5 | – | 11–12 (speed control) | **slots 5 and 7 gain SmartPort / block firmware**; slot 6 | expansion memory test | same | **New Laser 128 / 128EX** (accelerator, memory expansion) |
 | 6.0 | – | 10 | slots 5, 6, 7 | + 3.5" drive support ("eject disk from 1st 3.5" drive") | "LASER 128 ROM Version 6.0" (1985–88) | **128EX**, later ROM (or early EX/2) |
-| EX/2 6.1 | – | 11 | slots 5, 6, 7 | + Boot Slot, System Speed and Date and Time added to the port configuration program; MSM6242 clock at `$C078`; built-in MIDI port (location not yet found) | "LASER 128EX/2 ROM Version 6.1" | **128EX/2** |
+| EX/2 6.1 | – | 11 | slots 5, 6, 7 | + Boot Slot, System Speed and Date and Time added to the port configuration program; MSM6242 clock at `$C078`; MIDI through the Port 2 serial connector | "LASER 128EX/2 ROM Version 6.1" | **128EX/2** |
 
 2.7 sits between VTech's firmware and 2.9: it checks only the **P** and **M** power-up keys (as VTech's ROMs do),
 keeps VTech's backwards "CHECK DISK, PRESS A KEY TO REBOOT" message in the `$6800` bank, and otherwise is closest
@@ -35,13 +35,66 @@ from VTech's 1986 firmware on, also has the **port configuration program** ("LAS
 printer, serial ports, mouse scaling; run it with `CFFF`, `C100`, `CADEG` per COMPUTIST #66). The EX/2 extends
 it; it isn't new there.
 
+## From the 1989 User's Guide (Laser 128, 128EX, 128EX/2)
+Source: `docs/ref/Laser 128 128EX 128EX2 User's Guide & BASIC Manual (1989).pdf` (VTech).
+
+**Models**
+- **Laser 128:** 65C02 at 1 MHz, 128K RAM, up to 1 MB expansion RAM with an optional Memory Expansion Card.
+- **128EX:** adds a CPU clock selectable between **1, 2.3 and 3.6 MHz**, an extra **64K of video RAM**, 3.5" drive
+  support, and the Memory Expansion Card already fitted (add RAM chips). Speed is set by **holding 1, 2 or 3
+  during power-up**.
+- **128EX/2:** adds a battery-backed **time and date clock**, **MIDI**, and an optional internal 3.5" (800K) drive.
+
+**Ports (Table 6-1)**
+
+| Port | Device |
+|---|---|
+| 0 | 40-column display |
+| 1 | parallel or serial printer |
+| 2 | serial communications |
+| 3 | 80-column display |
+| 4 | mouse |
+| 5 | 1M expansion RAM interface |
+| 6 | 5.25" disk drives |
+| 7 | 3.5" disk drives |
+
+**Switches under the ROM door:** INT/EXT for port 5 and for port 7. INT selects the built-in interface (port 5 =
+expansion memory, port 7 = 3.5" drive interface); EXT selects a card in the optional expansion box (one card).
+
+**Control panel:** hold **P** at power-on, or with Ctrl-Reset. On all models: printer, serial port and mouse
+settings.
+- The **EX/2** adds:
+  - **Boot Slot:** 7 (3.5" drives, the default), 6 (5.25" drives, internal or external) or 5 (RAM disk, bootable
+    once formatted and given an OS).
+  - **System Speed:** Fast 3.6, Medium 2.3 or Standard 1.0 MHz.
+  - **Date and Time.**
+
+  The EX/2 keeps these settings with the power off.
+- If the chosen boot slot has nothing bootable, the EX/2 tries the next lower-numbered slot.
+
+**MIDI (EX/2 only):** through the **Port 2 (serial communications) connector**, with a Y cable (MIDI IN / MIDI OUT).
+On the v1 board that port is the second 6551 ACIA, at `$C0A8–$C0AB`. MIDI's 31,250 baud isn't a standard 6551
+rate, so the EX/2 presumably clocks that ACIA differently. MIDI software came with the machine.
+
+**Video expansion connector (Figure C-6):**
+- digital **RGBI** (pins 3, 15, 4, 1);
+- HSYNC / VSYNC / CSYNC (pins 9, 14, 10);
+- composite video (pin 12);
+- the LCD signals (SEROUT, LOAD PULSE, DISPEN, F14M);
+- +12 V and the speaker.
+
+The manual describes it as being for "a flat-panel LCD display, a TV interface or a RGB monitor".
+
+Also in Appendix C: the expansion connector and the RAM expansion connector pinouts (relevant to the
+Laser128EX-Expansion card project).
+
 ## Unknowns to settle with real machines
 - Which ROM versions are in your New Laser 128, 128EX and EX/2 (label and banner). The banner can be listed with
   the Applesoft loop in Laser128-QHGR's `docs/qhgr-investigation.md` ("Identifying a ROM").
 - Whether `$C074` does anything on a New Laser 128.
 - ~~Which slot is the expansion-RAM disk~~ **Answered:** on New Lasers it's always **slot 5**, auto-formatted by
-  the firmware as `/RAM5` (found in the Laser128EX-Expansion work). Switches under the ROM door set slots 5 and 7
-  each to internal or external (external routes the slot to the expansion box); internal slot 5 = the RAM disk.
-  What internal slot 7 is should be in the documentation.
-- Where the EX/2's built-in **MIDI port** lives (slot / I/O addresses). No "MIDI" text in 6.1; to find in the
-  firmware or documentation.
+  the firmware as `/RAM5` (found in the Laser128EX-Expansion work). Internal port 7 is the **3.5" drive
+  interface** (User's Guide, Table 6-1). The ROM-door switches select internal or the expansion box for each.
+- ~~Where the EX/2's MIDI port lives~~ **Answered:** the Port 2 serial connector (User's Guide). Still open: how
+  the EX/2 gets 31,250 baud from that ACIA.
+- Which ROM version each model shipped with. The User's Guide doesn't say; machine labels will.

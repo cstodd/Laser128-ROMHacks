@@ -1,6 +1,14 @@
 # Boot menu: design notes
 
-**Status (Nov 2026): built for ROM 2.7, 2.9 and 3.0; see `software/bootmenu/README.md`. Awaiting hardware test.**
+**Status (Nov 2026): built for ROM 2.7, 2.9 and 3.0 (`software/bootmenu/README.md`), and tested on real hardware
+with 3.0 on S/N 59554 (original Laser 128):**
+- **Menu:** B at reset brings up the menu; normal startup, and the P and M reset keys, are unchanged.
+- **External drive with ProDOS:** first build: ProDOS started from the FloppyEmu on the external port, then
+  switched to the internal drive as predicted. With the FIXUP version: **boots and stays on drive 2.**
+- **Banner:** "3.0X" banner version tested.
+- **Quad Hi-Res:** still works with the new ROM (DHGRTEST2).
+- **Not yet tried on hardware:** the 2.7 and 2.9 images, option 7 with a card, and DOS 3.3 from drive 2 (expected
+  to switch to drive 1).
 
 **Goal:** choose the boot device at power-up or reset, especially the **external** 5.25" port, so a FloppyEmu or
 second drive can boot without opening the machine.
@@ -72,10 +80,16 @@ on 4.x+ machines there's no such problem: they boot through slot 5/7 firmware.
 4. Produce a patched 27256 image, try it in an EPROM, and test boots from both drives with a FloppyEmu.
 
 ## Later: New Laser 128 / 128EX (4.x, 6.x)
-Not started; noted for when there's a machine to test on.
-- These ROMs already have SmartPort/block firmware in **slots 5 and 7**: the expansion-RAM disk is at slot 5 or 7
-  depending on model/card. A menu there would add **5** and **7** choices: start the firmware, as the ROM's own
-  slot 7 start does; no boot-code changes needed.
+Started Nov 2026 (survey of 3.3–6.1). Next: the ROM version in the owner's New Laser 128, and BANKTEST2 on it.
+- **3.3 / 3.5:** same three empty `$C800` banks as the original-board ROMs (chip `$6000`, `$7000`, `$7800`).
+  But the two gaps the original-board menu used (`$FAF5`, `$FEE9`) are taken, and the cold start has no
+  `LDA $C701` slot 7 test. The power-up key check is table-driven (P, M, Q, R, S, @). The free main-bank gaps
+  are ~22–23 bytes each (`$F1AB`, `$F209`, `$F379`, `$FF09`).
+- **4.x:** no empty banks. The largest free run is 1,120 bytes in the `$7800` bank (993 in 6.x).
+- These ROMs already have SmartPort/block firmware in **slots 5 and 7**. **Slot 5 is the expansion-RAM disk**,
+  auto-formatted by the firmware as `/RAM5`. New Lasers have switches under the ROM door, one each for slots 5
+  and 7, setting internal or external (external routes the slot to the expansion box). A menu here would add
+  **5** and **7** choices: start the firmware, as the ROM's own slot 7 start does; no boot-code changes needed.
 - Room: the main bank has about 440 bytes in small gaps. The biggest free `$C800` area is about 1.1K (4.x) or
   993 bytes (6.x), at chip `$7800`. The current menu is 768 bytes including the 256-byte drive-2 boot copy.
 - First step: run BANKTEST2 on a New 128 / EX. The 4.x ROMs run code from chip `$5000`, `$6000` and `$7000`,

@@ -13,7 +13,8 @@ Firmware modifications for the VTech Laser 128 family, in the spirit of the Appl
 | `tools/freespace.py` | Free-space map of a 32K system ROM |
 | `tools/c800banks.py` | Checksums of the ROM's `$C800` banks, to compare with BANKTEST |
 | `software/banktest/` | BANKTEST: finds which `$C800` bank each select sequence reaches, on real hardware |
-| `software/asm65.py`, `sim65.py`, `mkdisk.py` | 65C02 assembler, 65C02 test model, ProDOS disk builder |
+| `software/asm65.py`, `sim65.py`, `mkdisk.py`, `prodisk.py` | 65C02 assembler, 65C02 test model, ProDOS disk builder, bootable-disk maker |
+| `software/prodos/` | ProDOS 2.4 (freely distributable): boot blocks, `PRODOS` and `BASIC.SYSTEM` for the tool disks |
 | `tools/softswitches.py`, `tools/strings.py` | Soft-switch reference scan and high-bit string extractor |
 
 Related: `cstodd/Laser128-QHGR` (the Quad Hi-Res investigation and the VT27-0430-0 video ROM dump).

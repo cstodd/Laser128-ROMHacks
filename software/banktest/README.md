@@ -12,7 +12,8 @@ For each sequence it records a 16-bit checksum of `$C800–$CFFE` and the first 
 the tests run, and printing waits until all tests are done, because the screen firmware itself switches banks.
 
 ## Use
-1. `BRUN /BANKTEST/BANKTEST` from `dist/BANKTEST.po`, or type in `dist/BANKTEST.monitor.txt` (423 bytes) and `6000G`.
+1. Boot `dist/BANKTEST.po` (a bootable ProDOS 2.4 disk; BANKTEST runs by itself), or type in
+   `dist/BANKTEST.monitor.txt` (423 bytes) and `6000G`.
 2. Photograph or copy the 15 lines.
 3. On the same machine's ROM dump, run `python3 -I tools/c800banks.py ROM.bin`. Each line on screen should match
    one chip block's sum. A sequence that matches nothing (or shows `$FF`s or floating data) reached no ROM.

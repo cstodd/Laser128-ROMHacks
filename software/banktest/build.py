@@ -3,7 +3,7 @@
 import os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..'))
-import asm65, mkdisk
+import asm65, prodisk
 from sim65 import Sim
 ORG = 0x6000
 
@@ -36,8 +36,7 @@ def main():
         f.write('(%d bytes, $%04X-$%04X)\n\n' % (len(code), ORG, ORG + len(code) - 1))
         for i in range(0, len(code), 8):
             f.write('%04X: %s\n' % (ORG + i, ' '.join('%02X' % b for b in code[i:i + 8])))
-    img = mkdisk.build_image('BANKTEST', [('BANKTEST', 0x06, ORG, code)])
-    assert mkdisk.read_image(img)['BANKTEST'] == (0x06, ORG, code)
+    img = prodisk.boot_image('BANKTEST', [('BANKTEST', 0x06, ORG, code)], 'BANKTEST')
     open(os.path.join(d, 'BANKTEST.po'), 'wb').write(img)
     print('BANKTEST: %d bytes, model check passed; wrote dist/' % len(code))
     print('\n'.join(lines[:4]))

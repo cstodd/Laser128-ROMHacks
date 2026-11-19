@@ -22,15 +22,20 @@ boards still has to be checked**, by tracing the firmware's bank-select code and
 ## Results (usable bytes)
 | ROM | Main bank `$C000–$FFFF` | Alt slot pages | `$C800` banks | Total |
 |---|---|---|---|---|
-| VTech 860801 / 860915 | ≈ 960 | ≈ 1,100 | ≈ 8,600 | 10,652 / ≈ 10,500 |
-| Central Point 2.9 | 757 | 856 | 7,427 | **11,040** |
-| 3.0 | 695 | ≈ 860 | ≈ 9,400 | 10,974 |
-| 3.5 | 442 | ≈ 820 | ≈ 9,380 | 10,640 |
-| 4.5 | 442 | ≈ 310 | ≈ 1,880 | 2,633 |
-| 6.0 | ≈ 410 | ≈ 330 | ≈ 2,540 | 3,278 |
-| EX/2 6.1 | 346 | ≈ 360 | ≈ 1,730 | 2,439 |
+| VTech 860801 | 901 | 955 | 8,796 | **10,652** |
+| VTech 860915 | 901 | 926 | 8,644 | **10,471** |
+| Central Point 2.9 | 757 | 856 | 9,427 | **11,040** |
+| 3.0 | 695 | 856 | 9,423 | **10,974** |
+| 3.3 | 465 | 824 | 9,395 | **10,684** |
+| 3.5 | 442 | 824 | 9,374 | **10,640** |
+| 4.1 | 680 | 308 | 1,936 | **2,924** |
+| 4.2 | 544 | 308 | 1,936 | **2,788** |
+| 4.3 | 465 | 308 | 1,904 | **2,677** |
+| 4.5 | 442 | 308 | 1,883 | **2,633** |
+| 6.0 | 326 | 327 | 2,625 | **3,278** |
+| EX/2 6.1 | 346 | 355 | 1,738 | **2,439** |
 
-(Exact per-block figures are in `freespace-detail.txt`. The rows marked ≈ are rounded from those.)
+Per-block figures are in `freespace-detail.txt`.
 
 - **The main bank is almost full in every version.** Applesoft at `$D000–$EFFF` has nothing free. The monitor
   area has scattered 17–54-byte gaps. The biggest pieces are in the slot pages (`$C787`, about 120 bytes) and at the

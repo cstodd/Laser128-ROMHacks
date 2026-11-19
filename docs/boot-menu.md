@@ -20,6 +20,12 @@ second drive can boot without opening the machine.
   also Q, R, S, @; M = Return = break into the monitor, per COMPUTIST #66). A boot-menu key could join this
   table.
 
+## The existing configuration program
+Every ROM has the port configuration program (in the `$C800` bank at chip `$4800`), and the EX/2 adds a Boot Slot
+item to it. That's the natural place for a boot option, but the bank is nearly full (33 free bytes in 2.9, about 200
+in 6.1). The likely approach: keep the menu itself in an empty bank, and add only a short hook (a key or menu line)
+to the configuration program. The EX/2's Boot Slot code in 6.1 is worth reading first, as a model.
+
 ## Planned menu
 ```
   LASER 128 BOOT

@@ -44,7 +44,7 @@ Per-block figures are in `freespace-detail.txt`.
   - **Up to 3.5:** about 9K is free, including three completely empty 2K blocks (chip `$6000`, `$7000` and
     `$7800`) and most of `$5000` and `$6800`.
   - **From 4.x on:** most of that is used by the diagnostics, the expansion RAM test, 3.5" drive support and
-    the EX/2's setup menu and clock. About 2–2.5K remains, the largest piece a 1,120-byte run (4.x) or a
+    the EX/2's additions to the configuration program and its clock. About 2–2.5K remains, the largest piece a 1,120-byte run (4.x) or a
     993-byte run (6.x) in chip `$7800`.
 
 ## What this means for a ROM 4X-style project

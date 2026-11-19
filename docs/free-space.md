@@ -63,3 +63,21 @@ Per-block figures are in `freespace-detail.txt`.
 S/N 59554 has ROM **2.7**, which is not in this collection. The earliest Central Point ROM here is 2.9. A dump
 of 2.7 would be worth having, both as an archival item and as the exact base for hacks on that machine. It
 plugs into the same tools.
+
+## BANKTEST on S/N 59554 (original Laser 128, ROM 2.7, stock ROM), Nov 2026
+| Sequence after `$CFFF` | Sum | Reached |
+|---|---|---|
+| none | 07F7 | nothing (floating bus) |
+| `C1` | 42E6 | chip `$4800` (port configuration program) |
+| `C2` | A43A | chip `$5800` (Applesoft hi-res helpers) |
+| `C3` | 6C23 | chip `$0800` (main bank's `$C800` code) |
+| `C4`, `C5`, `C7` | 0793, 073F, 07F3 | nothing (floating) |
+| `C6` | 8AE3 | chip `$6800` (monitor disassembler) |
+| `C6` then `C1`, `C4`, `C5`, `C7` | 8AE3 | chip `$6800` (unchanged) |
+| **`C6` then `C2`** | **F701 (all `$FF`)** | **an empty bank: chip `$6000`, `$7000` or `$7800`** |
+| `C6` then `C3`; `C3` then `C6` | 6C23 | chip `$0800`: once `C3` is touched it stays |
+
+So the original board reaches five banks: `$0800`, `$4800`, `$5800`, `$6800`, and one empty 2K bank via
+`$CFFF`, `$C600`, `$C200`. That empty bank is enough for a boot menu. Still open: which empty block it is (the stock
+ROM can't tell them apart), and whether other pairs reach more. `software/banktest2` tries every pair of slot
+pages, and run with `roms/test/Laser128_2.7_bankmarkers.bin` in the machine it answers both.

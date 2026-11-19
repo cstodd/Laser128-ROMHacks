@@ -70,3 +70,15 @@ on 4.x+ machines there's no such problem: they boot through slot 5/7 firmware.
 2. Map the 2.7 ROM: find the power-up key table, its handlers and free gaps in the main bank.
 3. Build the menu in the free bank, with the drive-2 boot variant, and test in the 65C02 model.
 4. Produce a patched 27256 image, try it in an EPROM, and test boots from both drives with a FloppyEmu.
+
+## Later: New Laser 128 / 128EX (4.x, 6.x)
+Not started; noted for when there's a machine to test on.
+- These ROMs already have SmartPort/block firmware in **slots 5 and 7**: the expansion-RAM disk is at slot 5 or 7
+  depending on model/card. A menu there would add **5** and **7** choices: start the firmware, as the ROM's own
+  slot 7 start does; no boot-code changes needed.
+- Room: the main bank has about 440 bytes in small gaps. The biggest free `$C800` area is about 1.1K (4.x) or
+  993 bytes (6.x), at chip `$7800`. The current menu is 768 bytes including the 256-byte drive-2 boot copy.
+- First step: run BANKTEST2 on a New 128 / EX. The 4.x ROMs run code from chip `$5000`, `$6000` and `$7000`,
+  which the original board can't reach, so these boards decode the `$C800` banks differently.
+- Also: where the 4.x/6.x reset key check, cold-start end and free gaps sit; the key table there already has
+  P, M, Q, R, S, @.

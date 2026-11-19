@@ -61,8 +61,10 @@ second custom chip, IC2, drives `ENBL1`/`ENBL2` for the internal and external dr
 on 4.x+ machines there's no such problem: they boot through slot 5/7 firmware.
 
 ## Steps
-1. Run BANKTEST (`software/banktest`) on the early machine; match its sums to the 2.7 dump with
-   `tools/c800banks.py`. This shows which `$C800` banks exist and how to select them.
+1. ~~Find a home~~ **Done:** on the original board, chip `$7800` is an empty 2K bank, selected by `$CFFF`, then
+   `$C600`, then `$C200` (`free-space.md`). Code there runs at `$C800–$CFFF`. Anything that touches `$C3xx`
+   (the 80-column firmware, e.g. COUT once `PR#3` is active) or `$CFFF` switches it out. So the menu either
+   copies itself to RAM and runs there, or avoids those routines.
 2. Map the 2.7 ROM: find the power-up key table, its handlers and free gaps in the main bank.
 3. Build the menu in the free bank, with the drive-2 boot variant, and test in the 65C02 model.
 4. Produce a patched 27256 image, try it in an EPROM, and test boots from both drives with a FloppyEmu.

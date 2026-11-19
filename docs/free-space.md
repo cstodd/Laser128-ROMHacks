@@ -81,3 +81,32 @@ So the original board reaches five banks: `$0800`, `$4800`, `$5800`, `$6800`, an
 `$CFFF`, `$C600`, `$C200`. That empty bank is enough for a boot menu. Still open: which empty block it is (the stock
 ROM can't tell them apart), and whether other pairs reach more. `software/banktest2` tries every pair of slot
 pages, and run with `roms/test/Laser128_2.7_bankmarkers.bin` in the machine it answers both.
+
+## BANKTEST2 with the bank-marker ROM (S/N 59554, ROM 2.7 + markers), Nov 2026: the select rule
+| First page \ then | none | C1 | C2 | C3 | C4 | C5 | C6 | C7 |
+|---|---|---|---|---|---|---|---|---|
+| C1 | 42E6 | 42E6 | A43A | 6C23 | 42E6 | 42E6 | 8AE3 | 42E6 |
+| C2 | A43A | A43A | A43A | 6C23 | A43A | A43A | **BBEF** | A43A |
+| C3 | 6C23 | 6C23 | 6C23 | 6C23 | 6C23 | 6C23 | 6C23 | 6C23 |
+| C4 | float | 42E6 | A43A | 6C23 | float | float | 8AE3 | float |
+| C5 | float | 42E6 | A43A | 6C23 | float | float | 8AE3 | float |
+| C6 | 8AE3 | 8AE3 | **BBEF** | 6C23 | 8AE3 | 8AE3 | 8AE3 | 8AE3 |
+| C7 | float | 42E6 | A43A | 6C23 | float | float | 8AE3 | float |
+
+(42E6 = chip `$4800`, A43A = `$5800`, 6C23 = `$0800`, 8AE3 = `$6800`, BBEF = `$7800` marker; float = no ROM.)
+
+**Rule (original board):** after `$CFFF`,
+- touching `$C1xx`, `$C2xx` or `$C6xx` enables the `$C800` window;
+- `$C2` sets a latch that drives **chip A12**, and `$C6` sets a latch that drives **chip A13**, both held until
+  `$CFFF`. With A11 and A14 always high, the window shows chip `$4800`, `$5800` (C2), `$6800` (C6) or
+  **`$7800` (C2 and C6, in either order)**;
+- `$C3xx` overrides all of them with chip `$0800` (the main bank's own `$C800` code) until `$CFFF`;
+- `$C4`, `$C5`, `$C7` select nothing.
+
+**Chip `$5000`, `$6000` and `$7000` are unreachable on this board** (A11 is always high in the window); none of
+their markers appeared. Later boards must decode differently, since the 4.x ROMs run code from those blocks.
+
+**Usable free space on an original board with 2.7**, counting only reachable areas: main bank 757 bytes,
+`$C800` banks 2,636 bytes, of which chip `$7800` is a **completely empty 2K bank reached with `$CFFF`,
+`$C600`, `$C200`**. That's the home for the boot menu. (The alternate slot pages' free space, 859 bytes, is
+reachable only as slot firmware pages and isn't counted.)

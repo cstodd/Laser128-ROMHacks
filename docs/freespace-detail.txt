@@ -1,3 +1,21 @@
+== Laser128_2.7
+chip $0000  main $C000-$C7FF               free   160  $C2EE+18, $C3EB+21, $C787+121
+chip $0800  main $C800-$CFFF               free   311  $CEC9+311
+chip $1000  main $D000-$D7FF               free     0  
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free   195  $F1AB+23, $F209+23, $F379+23, $F4EE+22, $F506+52, $F5CD+52
+chip $3800  main $F800-$FFFF               free    91  $FAF5+20, $FC8B+17, $FEE9+54
+chip $4000  alt slot pages $C100-$C7FF     free   859  $C19A+54, $C1EA+22, $C2F1+271, $C500+256, $C700+256
+chip $4800  $C800 bank (chip $4800)        free    33  $CFDF+33
+chip $5000  $C800 bank (chip $5000)        free  1869  $C800+256, $C99A+54, $C9E9+1559
+chip $5800  $C800 bank (chip $5800)        free   254  $C9D6+42, $CF2C+212
+chip $6000  $C800 bank (chip $6000)        free  2048  $C800+2048
+chip $6800  $C800 bank (chip $6800)        free   301  $CED3+301
+chip $7000  $C800 bank (chip $7000)        free  2048  $C800+2048
+chip $7800  $C800 bank (chip $7800)        free  2048  $C800+2048
+total usable free: 10217 bytes
 == Laser128_2.9
 chip $0000  main $C000-$C7FF               free   160  $C2EE+18, $C3EB+21, $C787+121
 chip $0800  main $C800-$CFFF               free   311  $CEC9+311

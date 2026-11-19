@@ -16,9 +16,14 @@ second drive can boot without opening the machine.
 - 2.x and 3.x have no other boot firmware (slots 5 and 7 are empty). 4.x and later have SmartPort/block
   firmware in slots 5 and 7, so **`PR#5`/`PR#7` can already boot a SmartPort device on those ROMs**; a menu
   just makes it reachable at power-up.
-- At power-up, holding a key selects special actions through a small table in the main bank (P, M and from 3.3
-  also Q, R, S, @; M = Return = break into the monitor, per COMPUTIST #66). A boot-menu key could join this
-  table.
+- At power-up, holding a key selects special actions. In 2.7 (and VTech's ROMs) the code at `$F9B0` selects the
+  `$C100` bank, reads the key, masks it with `AND #$1F` (so Ctrl and plain letters both work) and checks two keys:
+  - **P** → `JMP $CB06`: the **port configuration program** (in the `$C800` bank at chip `$4800`).
+  - **M** (= Return) → wait for release, `JMP $FF69`: **the monitor** (COMPUTIST #66's "NMI").
+  - otherwise → normal cold start, which ends in `JMP $C600` (boot slot 6).
+  From 3.3 the check becomes a table (P, M, Q, R, S, @) with a jump table. A boot-menu key (for example **B**)
+  belongs here: in 2.7 it needs one more compare-and-branch, which means moving a few bytes into a free gap
+  (the nearest is 20 bytes at `$FAF5`).
 
 ## The existing configuration program
 Every ROM has the port configuration program (in the `$C800` bank at chip `$4800`), and the EX/2 adds a Boot Slot

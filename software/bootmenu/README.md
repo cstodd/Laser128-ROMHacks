@@ -3,7 +3,7 @@
 **Hold B while powering on, or while pressing Ctrl-Reset, and keep holding it until the menu appears:**
 ```
         LASER 128 BOOT MENU
-        ROM 2.7 + BOOT MENU
+        ROM 3.0X
 
       1  INTERNAL DRIVE
       2  EXTERNAL DRIVE (DRIVE 2)
@@ -16,11 +16,15 @@
 Without B the machine starts exactly as before; the existing **P** (port configuration) and **M** (monitor) reset
 keys still work.
 
+The banner shown at cold start reads **"LASER 128 ROM Version 2.7X"** (2.9X; 3.0X keeps 3.0's spacing), to mark the
+modified firmware.
+
 Images (27256 / 27C256): `roms/bootmenu/Laser128_2.7_bootmenu.bin`, `…_2.9_…`, `…_3.0_…`. Checksums in
 `roms/bootmenu/CHECKSUMS.txt`. **Original board only:** the menu lives in a `$C800` bank selected the way the
 original board decodes it (`docs/free-space.md`).
 
 ## How it works
+- **Banner:** 3.0's trailing space becomes `X`; 2.7 and 2.9 close up `128  ROM` to `128 ROM` to make room.
 - **Reset key check** (`$F9C0`; `$F9C3` in 3.0): the `CMP #$10 / BEQ` for P becomes `JMP $FAF5`. The 20 bytes
   there handle P as before, and for **B** clear `$03F3`/`$03F4` so the reset takes the full cold-start path
   (also after Ctrl-Reset), then continue with the M check.

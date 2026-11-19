@@ -60,7 +60,7 @@ def extboot(rom, base, fixup, pad=0):
     return src, notes
 
 def build_body(ver, rom):
-    tmpl = open(os.path.join(HERE, 'menu.s')).read().replace('{VERSION}', ver + ' + BOOT MENU')
+    tmpl = open(os.path.join(HERE, 'menu.s')).read().replace('{VERSION}', ver + 'X')
     src, _ = extboot(rom, 0x1E00, 0x1000)                     # pass 1: sizes only
     _, sym = asm65.assemble(tmpl.replace('{EXTBOOT}', src), BODY)
     pad = (-sym['BOOT2']) & 0xFF; base = sym['BOOT2'] + pad    # pass 2: page-aligned copy, real FIXUP
@@ -93,13 +93,22 @@ def patch(ver):
     assert len(keyx) <= 20
     rom[k:k + 4] = bytes((0x4C, KEYX & 0xFF, KEYX >> 8, 0xEA))
     rom[s7:s7 + 3] = bytes((0x4C, BOOTSEL & 0xFF, BOOTSEL >> 8))
+    hb = lambda t: bytes(c | 0x80 for c in t)          # banner: "...ROM Version 3.0X" (same length)
+    old = hb(b'LASER 128  ROM Version ' + ver.encode())
+    b = bytes(rom).find(old); assert b > 0 and bytes(rom).count(old) == 1, 'banner'
+    if rom[b + len(old)] == 0xA0:                      # 3.0: trailing space -> X
+        new, banner = old + hb(b'X'), (b, len(old) + 1)
+    else:                                              # 2.7 / 2.9: "128  ROM" -> "128 ROM", then X
+        new, banner = hb(b'LASER 128 ROM Version ' + ver.encode() + b'X'), (b, len(old))
+    assert rom[b + len(new)] == 0x8D
+    rom[b:b + len(new)] = new
     body, sym, notes = build_body(ver, orig)
     copier, _ = asm65.assemble(open(os.path.join(HERE, 'copier.s')).read(), 0xC800)
     assert len(copier) <= 0x100 and all(b == 0xFF for b in orig[BANK:BANK + 0x800])
     rom[BANK:BANK + len(copier)] = copier
     rom[BANK + 0x100:BANK + 0x100 + len(body)] = body
     info = dict(key=cpu(k), p=p_target, m=m_target, cmp0d=cmp0d, s7=cpu(s7), keyx=len(keyx), sel=len(sel),
-                body=len(body), sym=sym, notes=notes, body_bytes=body)
+                body=len(body), sym=sym, notes=notes, body_bytes=body, banner=banner)
     return bytes(rom), orig, info
 
 class Machine(Sim):
@@ -116,7 +125,9 @@ class Machine(Sim):
 def check(ver, rom, orig, info):
     diff = sorted({i for i in range(len(rom)) if rom[i] != orig[i]})
     regions = [(info['key'] - 0xC000, 4), (info['s7'] - 0xC000, 3), (KEYX - 0xC000, info['keyx']),
-               (BOOTSEL - 0xC000, info['sel']), (BANK, 0x800)]
+               (BOOTSEL - 0xC000, info['sel']), (BANK, 0x800), info['banner']]
+    t = bytes(c & 0x7F for c in rom[info['banner'][0]:info['banner'][0] + 28])
+    assert t.startswith(b'LASER 128') and (ver + 'X\r').encode() in t, t
     assert all(any(o <= i < o + n for o, n in regions) for i in diff), 'unexpected change'
     # 1. key check
     for key, want in ((0x10, info['p']), (0x0D, info['m']), (0x02, info['cmp0d'] + 4), (0x01, info['cmp0d'] + 4)):
@@ -171,6 +182,8 @@ def main():
         name = 'Laser128_%s_bootmenu.bin' % ver
         open(os.path.join(out, name), 'wb').write(rom)
         lines.append('%-28s crc32 %08x  sha256 %s' % (name, zlib.crc32(rom), hashlib.sha256(rom).hexdigest()))
+        bt = bytes(c & 0x7F for c in rom[info['banner'][0]:info['banner'][0] + 30]).split(b'\r')[0].decode()
+        print(f"{ver}: banner '{bt}'")
         print(f"{ver}: key check ${info['key']:04X} (P ${info['p']:04X}, M ${info['m']:04X}), slot 7 test ${info['s7']:04X}; "
               f"KEYX {info['keyx']} bytes, BOOTSEL {info['sel']} bytes, menu body {info['body']} bytes; model checks passed")
         for n in info['notes'] or []: print('    boot copy:', n)

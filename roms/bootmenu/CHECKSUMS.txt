@@ -1,3 +1,3 @@
-Laser128_2.7_bootmenu.bin    crc32 a0fab82c  sha256 eb5eb00b1fead6c49494d6eb9eff6ef2f9b2b03df4b52af4483abf8ee5a206e2
-Laser128_2.9_bootmenu.bin    crc32 92018499  sha256 63347dac93bd2086820027d7c4e44f4885767357b65cc8c9f5c009eab50751dd
-Laser128_3.0_bootmenu.bin    crc32 9a46fd0f  sha256 3c93c58b84d25be7f290b415d8b7215237358c6ed9708bebd6cec550f0f7d9b3
+Laser128_2.7_bootmenu.bin    crc32 cca8df84  sha256 1bb93fcc53d611d0077de99b85067fc8db6b7564d56e678c9dd098d8e9028a99
+Laser128_2.9_bootmenu.bin    crc32 cec4f41d  sha256 4dd01d38166e0251da2aaa986df7b8de1af58f8775167627700de22d18a73bf2
+Laser128_3.0_bootmenu.bin    crc32 fc99de78  sha256 88c344c94ad64439fcf7d816540fe96f81ef01d57cc7df82b04bdb69858b9c14

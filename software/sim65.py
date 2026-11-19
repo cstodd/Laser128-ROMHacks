@@ -30,9 +30,12 @@ class Sim:
     def rts(s): lo = s.pull(); return ((s.pull() << 8) | lo) + 1
     def writes(s, skip=(0xC000, 0xC004, 0xC005, 0xC010)):
         return [e[1] for e in s.io if e[0] == 'W' and e[1] not in skip]
-    def run(s, limit=3_000_000):
-        pc = s.org; s.push(0xFF); s.push(0xFE)            # RTS to $FFFF ends the run
+    def run(s, limit=3_000_000, start=None, stop=()):
+        """Run from start (default org). Ends at RTS to $FFFF, or when pc reaches an address in stop
+        (that address is returned and s.pc is set)."""
+        pc = s.org if start is None else start; s.push(0xFF); s.push(0xFE)   # RTS to $FFFF ends the run
         for _ in range(limit):
+            if pc in stop: s.pc = pc; return pc
             if pc == 0xFFFF: return
             if pc == 0xFC58:                               # HOME: clear text page 1
                 for a in range(0x400, 0x800): s.main[a] = 0xA0
@@ -59,6 +62,7 @@ class Sim:
             elif op == 0xCA: s.x = s.nz(s.x - 1); n = 1
             elif op == 0x9D: s.wr(w + s.x, s.a); n = 3
             elif op == 0x99: s.wr(w + s.y, s.a); n = 3
+            elif op == 0x2C: v = s.rd(w); s.z = (s.a & v) == 0; s.n = bool(v & 0x80); n = 3
             elif op == 0x9E: s.wr(w + s.x, 0); n = 3
             elif op == 0x5D: s.a = s.nz(s.a ^ s.rd(w + s.x)); n = 3
             elif op == 0xDD: v = s.rd(w + s.x); s.c = s.a >= v; s.nz(s.a - v); n = 3

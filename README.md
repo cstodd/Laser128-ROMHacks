@@ -12,6 +12,7 @@ Firmware modifications for the VTech Laser 128 family, in the spirit of the Appl
 | `tools/dis65c02.py` | 65C02 disassembler: `python3 -I dis65c02.py ROM START END` (hex file offsets) |
 | `tools/freespace.py` | Free-space map of a 32K system ROM |
 | `tools/c800banks.py` | Checksums of the ROM's `$C800` banks, to compare with BANKTEST |
+| `software/bootmenu/`, `roms/bootmenu/` | **Boot menu** for the original Laser 128 (2.7, 2.9, 3.0): hold B at reset; external drive boot |
 | `software/banktest2/` | BANKTEST2: every pair of slot-page accesses, as a grid of checksums |
 | `software/banktest/` | BANKTEST: finds which `$C800` bank each select sequence reaches, on real hardware |
 | `software/asm65.py`, `sim65.py`, `mkdisk.py`, `prodisk.py` | 65C02 assembler, 65C02 test model, ProDOS disk builder, bootable-disk maker |

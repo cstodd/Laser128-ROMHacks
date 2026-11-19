@@ -1,5 +1,7 @@
 # Boot menu: design notes
 
+**Status (Nov 2026): built for ROM 2.7, 2.9 and 3.0; see `software/bootmenu/README.md`. Awaiting hardware test.**
+
 **Goal:** choose the boot device at power-up or reset, especially the **external** 5.25" port, so a FloppyEmu or
 second drive can boot without opening the machine.
 

@@ -43,10 +43,17 @@ Source: `docs/ref/Laser 128 128EX 128EX2 User's Guide & BASIC Manual (1989).pdf`
 - **128EX:** adds a CPU clock selectable between **1, 2.3 and 3.6 MHz**, an extra **64K of video RAM**, 3.5" drive
   support, and the Memory Expansion Card already fitted (add RAM chips). Speed is set by **holding 1, 2 or 3
   during power-up**.
-  The extra 64K of video RAM is understood to be there for the accelerator: the CPU at 2.3/3.6 MHz can't share
-  main memory with the video circuitry the way it does at 1 MHz (owner's recollection; consistent with
-  https://forum.vcfed.org/index.php?threads/differences-between-laser-128-128ex-128ex-2.78438/ , not yet checked
-  against documentation).
+  The extra 64K of video RAM is for the accelerator. Laser's own 1988 EX/2 ad ("Inside Story",
+  `docs/ref/Laser 128EX2 Inside Story ad (1988).jpg`) says: "64K Video RAM. Controlled by our own Video Display
+  Generator (VDG) array, this feature off-loads video work from the 128K system RAM, providing both analog and
+  digital (IBM®-type RGB) outputs." So the video has its own copy of display memory, freeing main RAM for the CPU
+  at 2.3/3.6 MHz.
+- **The same ad** names the other custom arrays:
+  - a "Memory Management Unit (MMU) array" controlling the 1 MB RAM board (256K × 1 DRAMs);
+  - a "Universal Disk Controller (UDC) array" for 3.5" and 5.25" drives, with the EX/2 supporting IIGS-style
+    "Daisy Chain" drives;
+  - the EX/2's MIDI port and real-time clock;
+  - and it calls the ROM "the only legal Apple compatible ROM on the market".
 - **128EX/2:** adds a battery-backed **time and date clock**, **MIDI**, and an optional internal 3.5" (800K) drive.
 
 **Ports (Table 6-1)**

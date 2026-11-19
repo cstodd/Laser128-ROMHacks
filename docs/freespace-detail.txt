@@ -1,0 +1,216 @@
+== Laser128_2.9
+chip $0000  main $C000-$C7FF               free   160  $C2EE+18, $C3EB+21, $C787+121
+chip $0800  main $C800-$CFFF               free   311  $CEC9+311
+chip $1000  main $D000-$D7FF               free     0  
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free   195  $F1AB+23, $F209+23, $F379+23, $F4EE+22, $F506+52, $F5CD+52
+chip $3800  main $F800-$FFFF               free    91  $FAF5+20, $FC8B+17, $FEE9+54
+chip $4000  alt slot pages $C100-$C7FF     free   856  $C19D+51, $C1EA+22, $C2F1+271, $C500+256, $C700+256
+chip $4800  $C800 bank (chip $4800)        free    33  $CFDF+33
+chip $5000  $C800 bank (chip $5000)        free  1866  $C800+256, $C99D+51, $C9E9+1559
+chip $5800  $C800 bank (chip $5800)        free   254  $C9D6+42, $CF2C+212
+chip $6000  $C800 bank (chip $6000)        free  2048  $C800+2048
+chip $6800  $C800 bank (chip $6800)        free  1130  $C8A0+1120, $CFF6+10
+chip $7000  $C800 bank (chip $7000)        free  2048  $C800+2048
+chip $7800  $C800 bank (chip $7800)        free  2048  $C800+2048
+total usable free: 11040 bytes
+== Laser128_EX2_6.1
+chip $0000  main $C000-$C7FF               free   179  $C2D2+46, $C3EE+18, $C78D+115
+chip $0800  main $C800-$CFFF               free    81  $CFAF+81
+chip $1000  main $D000-$D7FF               free     0  
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free    86  $F1AB+23, $F209+23, $F379+23, $F758+17
+chip $3800  main $F800-$FFFF               free     0  
+chip $4000  alt slot pages $C100-$C7FF     free   355  $C192+18, $C2A3+69, $C2F4+268
+chip $4800  $C800 bank (chip $4800)        free   211  $C99A+16, $CF3D+195
+chip $5000  $C800 bank (chip $5000)        free   118  $C9BC+20, $CF9E+98
+chip $5800  $C800 bank (chip $5800)        free   290  $C997+105, $CF47+185
+chip $6000  $C800 bank (chip $6000)        free    72  $CBB1+47, $CBE7+25
+chip $6800  $C800 bank (chip $6800)        free    38  $CBF0+16, $CFEA+22
+chip $7000  $C800 bank (chip $7000)        free    16  $C80C+16
+chip $7800  $C800 bank (chip $7800)        free   993  $C91F+993
+total usable free: 2439 bytes
+== laser128-860801
+chip $0000  main $C000-$C7FF               free   643  $C100+512, $C3EB+21, $C4EB+16, $C7A2+94
+chip $0800  main $C800-$CFFF               free    43  $CFD5+43
+chip $1000  main $D000-$D7FF               free    21  $D24B+21
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free   134  $F1AB+23, $F202+30, $F379+23, $F5A7+36, $F647+22
+chip $3800  main $F800-$FFFF               free    60  $FAF5+20, $FC8B+17, $FF08+23
+chip $4000  alt slot pages $C100-$C7FF     free   955  $C191+63, $C1EA+22, $C2E5+283, $C4EB+16, $C500+256, $C6B0+59 ...
+chip $4800  $C800 bank (chip $4800)        free    81  $CFAF+81
+chip $5000  $C800 bank (chip $5000)        free  1876  $C800+256, $C993+61, $C9E9+1559
+chip $5800  $C800 bank (chip $5800)        free   250  $C9D8+40, $CF2E+210
+chip $6000  $C800 bank (chip $6000)        free  2048  $C800+2048
+chip $6800  $C800 bank (chip $6800)        free   445  $C9E4+23, $CE5A+422
+chip $7000  $C800 bank (chip $7000)        free  2048  $C800+2048
+chip $7800  $C800 bank (chip $7800)        free  2048  $C800+2048
+total usable free: 10652 bytes
+== laser128-860915
+chip $0000  main $C000-$C7FF               free   643  $C100+512, $C3EB+21, $C4EB+16, $C7A2+94
+chip $0800  main $C800-$CFFF               free    43  $CFD5+43
+chip $1000  main $D000-$D7FF               free    21  $D24B+21
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free   134  $F1AB+23, $F202+30, $F379+23, $F5A7+36, $F647+22
+chip $3800  main $F800-$FFFF               free    60  $FAF5+20, $FC8B+17, $FF08+23
+chip $4000  alt slot pages $C100-$C7FF     free   926  $C191+63, $C1EA+22, $C2E5+283, $C4EB+16, $C500+256, $C6CD+30 ...
+chip $4800  $C800 bank (chip $4800)        free    81  $CFAF+81
+chip $5000  $C800 bank (chip $5000)        free  1876  $C800+256, $C993+61, $C9E9+1559
+chip $5800  $C800 bank (chip $5800)        free   250  $C9D8+40, $CF2E+210
+chip $6000  $C800 bank (chip $6000)        free  2048  $C800+2048
+chip $6800  $C800 bank (chip $6800)        free   293  $CEDB+293
+chip $7000  $C800 bank (chip $7000)        free  2048  $C800+2048
+chip $7800  $C800 bank (chip $7800)        free  2048  $C800+2048
+total usable free: 10471 bytes
+== laser128-v3.0
+chip $0000  main $C000-$C7FF               free   157  $C2EE+18, $C3EE+18, $C787+121
+chip $0800  main $C800-$CFFF               free   304  $CED0+304
+chip $1000  main $D000-$D7FF               free     0  
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free   143  $F1AB+23, $F209+23, $F379+23, $F4EE+22, $F5CD+52
+chip $3800  main $F800-$FFFF               free    91  $FAF5+20, $FC8B+17, $FEE9+54
+chip $4000  alt slot pages $C100-$C7FF     free   856  $C19D+51, $C1EA+22, $C2F1+271, $C500+256, $C700+256
+chip $4800  $C800 bank (chip $4800)        free    33  $CFDF+33
+chip $5000  $C800 bank (chip $5000)        free  1866  $C800+256, $C99D+51, $C9E9+1559
+chip $5800  $C800 bank (chip $5800)        free   250  $C8B0+17, $C9E9+23, $CF2E+210
+chip $6000  $C800 bank (chip $6000)        free  2048  $C800+2048
+chip $6800  $C800 bank (chip $6800)        free  1130  $C8A0+1120, $CFF6+10
+chip $7000  $C800 bank (chip $7000)        free  2048  $C800+2048
+chip $7800  $C800 bank (chip $7800)        free  2048  $C800+2048
+total usable free: 10974 bytes
+== laser128-v3.3
+chip $0000  main $C000-$C7FF               free   151  $C2EE+18, $C3EE+18, $C78D+115
+chip $0800  main $C800-$CFFF               free   206  $CF32+206
+chip $1000  main $D000-$D7FF               free     0  
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free    69  $F1AB+23, $F209+23, $F379+23
+chip $3800  main $F800-$FFFF               free    39  $FC8B+17, $FF09+22
+chip $4000  alt slot pages $C100-$C7FF     free   824  $C1AB+37, $C2F1+271, $C4FC+260, $C700+256
+chip $4800  $C800 bank (chip $4800)        free    47  $CFD1+47
+chip $5000  $C800 bank (chip $5000)        free  1840  $C800+256, $C9AB+37, $C9F5+1547
+chip $5800  $C800 bank (chip $5800)        free   234  $C9DF+33, $CF37+201
+chip $6000  $C800 bank (chip $6000)        free  2048  $C800+2048
+chip $6800  $C800 bank (chip $6800)        free  1130  $C8A0+1120, $CFF6+10
+chip $7000  $C800 bank (chip $7000)        free  2048  $C800+2048
+chip $7800  $C800 bank (chip $7800)        free  2048  $C800+2048
+total usable free: 10684 bytes
+== LASER_128_ROM_Version_3.5
+chip $0000  main $C000-$C7FF               free   151  $C2EE+18, $C3EE+18, $C78D+115
+chip $0800  main $C800-$CFFF               free   200  $CF38+200
+chip $1000  main $D000-$D7FF               free     0  
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free    69  $F1AB+23, $F209+23, $F379+23
+chip $3800  main $F800-$FFFF               free    22  $FF09+22
+chip $4000  alt slot pages $C100-$C7FF     free   824  $C1AB+37, $C2F1+271, $C4FC+260, $C700+256
+chip $4800  $C800 bank (chip $4800)        free    47  $CFD1+47
+chip $5000  $C800 bank (chip $5000)        free  1835  $C800+256, $C9B0+32, $C9F5+1547
+chip $5800  $C800 bank (chip $5800)        free   218  $C9DF+33, $CF47+185
+chip $6000  $C800 bank (chip $6000)        free  2048  $C800+2048
+chip $6800  $C800 bank (chip $6800)        free  1130  $C8A0+1120, $CFF6+10
+chip $7000  $C800 bank (chip $7000)        free  2048  $C800+2048
+chip $7800  $C800 bank (chip $7800)        free  2048  $C800+2048
+total usable free: 10640 bytes
+== laser128-v4.1
+chip $0000  main $C000-$C7FF               free   154  $C2EE+18, $C3EE+18, $C78A+118
+chip $0800  main $C800-$CFFF               free   277  $CEEB+277
+chip $1000  main $D000-$D7FF               free     0  
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free   143  $F1AB+23, $F209+23, $F379+23, $F4EE+22, $F5CD+52
+chip $3800  main $F800-$FFFF               free   106  $FA26+51, $FAF9+16, $FC8B+17, $FF09+22
+chip $4000  alt slot pages $C100-$C7FF     free   308  $C1AB+37, $C2F1+271
+chip $4800  $C800 bank (chip $4800)        free    25  $CFE7+25
+chip $5000  $C800 bank (chip $5000)        free   152  $C9AB+37, $CF8D+115
+chip $5800  $C800 bank (chip $5800)        free   243  $C9DF+33, $CF2E+210
+chip $6000  $C800 bank (chip $6000)        free   105  $CBB5+75, $CFE2+30
+chip $6800  $C800 bank (chip $6800)        free    70  $CBD1+47, $CFE9+23
+chip $7000  $C800 bank (chip $7000)        free   221  $C80C+16, $CBCE+50, $CF65+155
+chip $7800  $C800 bank (chip $7800)        free  1120  $C8A0+1120
+total usable free: 2924 bytes
+== Laser128_4.2
+chip $0000  main $C000-$C7FF               free   154  $C2EE+18, $C3EE+18, $C78A+118
+chip $0800  main $C800-$CFFF               free   208  $CF30+208
+chip $1000  main $D000-$D7FF               free     0  
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free   143  $F1AB+23, $F209+23, $F379+23, $F4EE+22, $F5CD+52
+chip $3800  main $F800-$FFFF               free    39  $FC8B+17, $FF09+22
+chip $4000  alt slot pages $C100-$C7FF     free   308  $C1AB+37, $C2F1+271
+chip $4800  $C800 bank (chip $4800)        free    25  $CFE7+25
+chip $5000  $C800 bank (chip $5000)        free   152  $C9AB+37, $CF8D+115
+chip $5800  $C800 bank (chip $5800)        free   243  $C9DF+33, $CF2E+210
+chip $6000  $C800 bank (chip $6000)        free   105  $CBB5+75, $CFE2+30
+chip $6800  $C800 bank (chip $6800)        free    70  $CBD1+47, $CFE9+23
+chip $7000  $C800 bank (chip $7000)        free   221  $C80C+16, $CBCE+50, $CF65+155
+chip $7800  $C800 bank (chip $7800)        free  1120  $C8A0+1120
+total usable free: 2788 bytes
+== Laser128_4.3
+chip $0000  main $C000-$C7FF               free   151  $C2EE+18, $C3EE+18, $C78D+115
+chip $0800  main $C800-$CFFF               free   206  $CF32+206
+chip $1000  main $D000-$D7FF               free     0  
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free    69  $F1AB+23, $F209+23, $F379+23
+chip $3800  main $F800-$FFFF               free    39  $FC8B+17, $FF09+22
+chip $4000  alt slot pages $C100-$C7FF     free   308  $C1AB+37, $C2F1+271
+chip $4800  $C800 bank (chip $4800)        free    47  $CFD1+47
+chip $5000  $C800 bank (chip $5000)        free   152  $C9AB+37, $CF8D+115
+chip $5800  $C800 bank (chip $5800)        free   234  $C9DF+33, $CF37+201
+chip $6000  $C800 bank (chip $6000)        free   105  $CBB5+75, $CFE2+30
+chip $6800  $C800 bank (chip $6800)        free    47  $CBD1+47
+chip $7000  $C800 bank (chip $7000)        free   199  $C80C+16, $CBE4+28, $CF65+155
+chip $7800  $C800 bank (chip $7800)        free  1120  $C8A0+1120
+total usable free: 2677 bytes
+== laser128-v4.5
+chip $0000  main $C000-$C7FF               free   151  $C2EE+18, $C3EE+18, $C78D+115
+chip $0800  main $C800-$CFFF               free   200  $CF38+200
+chip $1000  main $D000-$D7FF               free     0  
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free    69  $F1AB+23, $F209+23, $F379+23
+chip $3800  main $F800-$FFFF               free    22  $FF09+22
+chip $4000  alt slot pages $C100-$C7FF     free   308  $C1AB+37, $C2F1+271
+chip $4800  $C800 bank (chip $4800)        free    47  $CFD1+47
+chip $5000  $C800 bank (chip $5000)        free   147  $C9B0+32, $CF8D+115
+chip $5800  $C800 bank (chip $5800)        free   218  $C9DF+33, $CF47+185
+chip $6000  $C800 bank (chip $6000)        free   105  $CBB5+75, $CFE2+30
+chip $6800  $C800 bank (chip $6800)        free    47  $CBD1+47
+chip $7000  $C800 bank (chip $7000)        free   199  $C80C+16, $CBE4+28, $CF65+155
+chip $7800  $C800 bank (chip $7800)        free  1120  $C8A0+1120
+total usable free: 2633 bytes
+== Laser128_6.0
+chip $0000  main $C000-$C7FF               free   151  $C2EE+18, $C3EE+18, $C78D+115
+chip $0800  main $C800-$CFFF               free    89  $CFA7+89
+chip $1000  main $D000-$D7FF               free     0  
+chip $1800  main $D800-$DFFF               free     0  
+chip $2000  main $E000-$E7FF               free     0  
+chip $2800  main $E800-$EFFF               free     0  
+chip $3000  main $F000-$F7FF               free    86  $F1AB+23, $F209+23, $F379+23, $F758+17
+chip $3800  main $F800-$FFFF               free     0  
+chip $4000  alt slot pages $C100-$C7FF     free   327  $C1AB+37, $C2F3+269, $C7E6+21
+chip $4800  $C800 bank (chip $4800)        free    47  $CFD1+47
+chip $5000  $C800 bank (chip $5000)        free   130  $C9B0+32, $CF9E+98
+chip $5800  $C800 bank (chip $5800)        free   218  $C9DF+33, $CF47+185
+chip $6000  $C800 bank (chip $6000)        free  1183  $CA1B+485, $CD46+698
+chip $6800  $C800 bank (chip $6800)        free    38  $CBF0+16, $CFEA+22
+chip $7000  $C800 bank (chip $7000)        free    16  $C80C+16
+chip $7800  $C800 bank (chip $7800)        free   993  $C91F+993
+total usable free: 3278 bytes

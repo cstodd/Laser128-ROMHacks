@@ -43,6 +43,10 @@ Source: `docs/ref/Laser 128 128EX 128EX2 User's Guide & BASIC Manual (1989).pdf`
 - **128EX:** adds a CPU clock selectable between **1, 2.3 and 3.6 MHz**, an extra **64K of video RAM**, 3.5" drive
   support, and the Memory Expansion Card already fitted (add RAM chips). Speed is set by **holding 1, 2 or 3
   during power-up**.
+  The extra 64K of video RAM is understood to be there for the accelerator: the CPU at 2.3/3.6 MHz can't share
+  main memory with the video circuitry the way it does at 1 MHz (owner's recollection; consistent with
+  https://forum.vcfed.org/index.php?threads/differences-between-laser-128-128ex-128ex-2.78438/ , not yet checked
+  against documentation).
 - **128EX/2:** adds a battery-backed **time and date clock**, **MIDI**, and an optional internal 3.5" (800K) drive.
 
 **Ports (Table 6-1)**

@@ -21,6 +21,11 @@ with 3.0 on S/N 59554 (original Laser 128):**
   - **Not a real difference:** re-checked on the EX with 5 INT and 7 EXT, and the EX behaves the same. The CoGS
     boots by itself (6.0's cold start scans from slot 7), and the menu shows 5 (`/RAM5`). The earlier EX tests
     were with no drive mounted on the CoGS and with port 5 on EXT.
+- **ROM 4.1–4.5 (New Laser 128):** built with the 6.0 patch, generalized (`NEW` profiles in `build.py`).
+  - The model checks pass. The gaps were checked: the only hits are the same `STZ $F210,X` false positive as in
+    6.0, and a `JSR $F220` just past the stub.
+  - Their reset-key tables (P, M/Return, and in 4.2+ the speed keys and `$00`) don't use B.
+  - Not tested on hardware.
 - **Earlier 6.0X, CRC32 `5627f1a7`:**
   - **The menu** comes up with B held at reset (the first build didn't; see the cold-start hook below).
   - **The EX's own reset keys** all still work.

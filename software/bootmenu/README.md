@@ -1,4 +1,4 @@
-# Boot menu for the Laser 128 (ROM 2.7, 2.9, 3.0) and 128EX (ROM 6.0)
+# Boot menu for the Laser 128 (ROM 2.7, 2.9, 3.0), New Laser 128 (4.1–4.5, 6.0) and 128EX (6.0)
 
 **Hold B while powering on, or while pressing Ctrl-Reset, and keep holding it until the menu appears:**
 ```
@@ -44,6 +44,17 @@ The EX's own reset keys (P/0 control panel, M/Return monitor, 1/2/3 speed, space
   With a port switch on INT the slot is the built-in RAM disk / 3.5" firmware; on EXT it's whatever card is
   there. A card such as a hard-disk controller appears and boots if its ROM has the standard boot signature
   (`$Cn01=$20`, `$Cn03=$00`, `$Cn05=$03`). The menu can't read the switches, hence the generic labels.
+
+## ROM 4.1, 4.2, 4.3, 4.5 (New Laser 128)
+`roms/bootmenu/Laser128_4.x_bootmenu.bin`, built by the same patch as 6.0. These ROMs have:
+- the same reset code shape (key table search, then `JSR` at `$F9BB`; banner-and-wait `JSR` at `$F9CE`);
+- the same free gaps (KEYB goes at `$F75B`);
+- the same `$7800` slot 6 helper bank, free from `$78A0`.
+
+The key routine and banner routine addresses differ (4.1: `$FA07`, `$CE35`; 4.2: `$FA29`, `$CE7A`; 4.3/4.5:
+`$FA29`, `$CE7C`). The build reads them from the two `JSR`s. Labels: "5  SLOT 5 (RAM DISK OR CARD)" and
+"7  SLOT 7". Banner: "LASER 128 ROM Version 4.xX". **Not tested on hardware** (6.0X has been, on the New Laser
+128 S/N 151202).
 
 ## How it works (2.7, 2.9, 3.0)
 - **Banner:** 3.0's trailing space becomes `X`; 2.7 and 2.9 close up `128  ROM` to `128 ROM` to make room.

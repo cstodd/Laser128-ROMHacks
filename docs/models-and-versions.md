@@ -149,6 +149,17 @@ Laser128EX-Expansion card project).
     - **Joshua Bell (comments):** a 128EX with ROM 4.2 reaches a directly connected FloppyEmu in SmartPort mode,
       but not one daisy-chained after an Apple 3.5 drive.
 
+    - **The 1989 User's Guide** (`docs/ref/`, covering the 128, 128EX and EX/2) **excludes the UniDisk 3.5**. The
+      external drive connector takes "any LASER or Apple® brand 5.25" or 3.5" daisy-chainable disk drive (with
+      the exception of the Apple® Unidisk 3.5)". Apple IIc drives work.
+      - External 5.25" = port 6 drive 2; external 3.5" = port 7 drives 1 and 2.
+      - "Two external 3.5" drives are configured as Slot 7 with the Laser 128 and 128EX only. On the Laser
+        128EX/2, you must use daisy-chain drives."
+
+      BMOW's post mentions a Laser 128 manual chapter that *lists* the UniDisk 3.5, presumably an earlier edition
+      from the 4.x / SmartPort era. The UniDisk 3.5 is a SmartPort device, so it would follow SmartPort: maybe on
+      4.2/4.5, not on 6.x.
+
     **Our results agree:** 6.1 sees no SmartPort devices in slot 5 or 7. To check: the 4.5X (or 4.2X) boot menu
     image with a FloppyEmu in SmartPort mode, connected directly, using option 7.
   - **Port 5 EXT:** `/RAM5` goes away. It seeks the internal floppy, then boots the FloppyEmu in 3.5" mode if

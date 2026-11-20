@@ -65,3 +65,6 @@ second bank, so the next step is to dump it (`software/carddump/README.md`, bank
   The cause isn't known yet. In the bank-1 code, the boot attempt ends early on error `$10` or `$0B` and then
   falls back. What those mean, and what the card needs (a server, a configured boot target), is in code we
   don't have yet: the second bank (`software/carddump/`) and the card's own firmware.
+- **Solved (Nov 2026):** once a drive from the server was mounted in the card's config menu, the network boot
+  stopped giving up. So the early fallback meant "nothing mounted", not a Laser problem. The second-bank dump is
+  no longer needed for this.

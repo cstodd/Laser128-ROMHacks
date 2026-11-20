@@ -19,12 +19,26 @@ class BankSim(Sim):
         if 0xC800 <= a < 0xCFFF: return s.banks[s.bank()][a - 0xC800]
         return super().rd(a)
 
+VARIANTS = {
+    'BANKTEST2': ('', '', 'C800 BANKS: ROW = 1ST PAGE C1..C7'),
+    'BANKTEST2X': ('        STA $C007       ; INTCXROM on during the tests\n', '        STA $C006       ; INTCXROM off again\n',
+                   'C800 BANKS, $C007 ON: ROW=1ST C1..C7'),
+}
+
 def main():
-    code, sym = asm65.assemble(open(os.path.join(HERE, 'banktest2.s')).read(), ORG)
+    for name, (pre, post, title) in VARIANTS.items():
+        build(name, pre, post, title)
+
+def build(name, pre, post, title):
+    src = open(os.path.join(HERE, 'banktest2.s')).read()
+    code, sym = asm65.assemble(src.replace('{PRE}', pre).replace('{POST}', post).replace('{TITLE}', title), ORG)
     rnd = random.Random(2)
     banks = [bytes(rnd.randrange(256) for _ in range(0x800)) for _ in range(11)]
     m = BankSim(code, banks); m.run(limit=20_000_000)
     rows = ''.join(m.out).split('\r')[3:10]
+    w = [e[1] for e in m.io if e[0] == 'W' and e[1] in (0xC006, 0xC007)]
+    assert w == ([0xC007, 0xC006] if pre else []), w
+    assert ''.join(m.out).split('\r')[0] == title, ''.join(m.out).split('\r')[0]
     for f in range(1, 8):
         want = []
         for s in range(8):
@@ -33,15 +47,14 @@ def main():
         assert rows[f - 1].strip() == ' '.join(want), (f, rows[f - 1], want)
     assert all(len(r) <= 39 for r in rows), 'rows must fit 40 columns'
     d = os.path.join(HERE, 'dist'); os.makedirs(d, exist_ok=True)
-    open(os.path.join(d, 'BANKTEST2'), 'wb').write(code)
-    with open(os.path.join(d, 'BANKTEST2.monitor.txt'), 'w') as fo:
+    open(os.path.join(d, name), 'wb').write(code)
+    with open(os.path.join(d, name + '.monitor.txt'), 'w') as fo:
         fo.write('Type CALL -151, then enter these lines at the * prompt, then 6000G to run.\n')
         fo.write('(%d bytes, $%04X-$%04X)\n\n' % (len(code), ORG, ORG + len(code) - 1))
         for i in range(0, len(code), 8):
             fo.write('%04X: %s\n' % (ORG + i, ' '.join('%02X' % b for b in code[i:i + 8])))
-    open(os.path.join(d, 'BANKTEST2.po'), 'wb').write(prodisk.boot_image('BANKTEST2', [('BANKTEST2', 0x06, ORG, code)], 'BANKTEST2'))
-    print('BANKTEST2: %d bytes, model check passed; wrote dist/' % len(code))
-    print('\n'.join(''.join(m.out).split('\r')[:10]))
+    open(os.path.join(d, name + '.po'), 'wb').write(prodisk.boot_image(name, [(name, 0x06, ORG, code)], name))
+    print('%s: %d bytes, model check passed; wrote dist/' % (name, len(code)))
 
 if __name__ == '__main__':
     main()

@@ -3,6 +3,7 @@
 ; checksum $C800-$CFFE (16-bit sum). All 56 tests run with interrupts off before anything is printed.
 ; Output: one row per first page (C1..C7), 8 columns (second: none, C1..C7), 4 hex digits each.
 ; Compare with tools/c800banks.py on the ROM in the machine (best: the bank-marker test ROM).
+; Built twice by build.py: BANKTEST2 (INTCXROM as found) and BANKTEST2X ($C007 INTCXROM on during the tests).
 PTR     = $06
 SUM     = $08
 F       = $0A           ; first page index 1-7
@@ -15,7 +16,7 @@ CROUT   = $FD8E
 
 START:  PHP
         SEI
-        STZ K
+{PRE}        STZ K
         LDA #1
         STA F
 TF:     STZ S
@@ -73,7 +74,7 @@ NF:     INC F
         BEQ DONE
         JMP TF
 DONE:   LDA $CFFF
-        PLP
+{POST}        PLP
         JSR HOME
         LDX #0
 PT:     LDA TITLE,X
@@ -106,7 +107,7 @@ PN:     JSR CROUT
         BNE PR
         RTS
 
-TITLE:  .aschi "C800 BANKS: ROW = 1ST PAGE C1..C7"
+TITLE:  .aschi "{TITLE}"
         .byte $8D
         .aschi "COL = 2ND PAGE: NONE,C1..C7"
         .byte $8D,$8D,0

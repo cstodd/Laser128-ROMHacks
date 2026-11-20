@@ -25,3 +25,9 @@ Anything else (around `07xx`) is the floating bus, meaning no ROM was selected.
 
 Boot `dist/BANKTEST2.po` (bootable ProDOS 2.4) or type in `dist/BANKTEST2.monitor.txt` (366 bytes) and `6000G`.
 `python3 build.py` checks the program in the 65C02 model against a simulated bank-select rule.
+
+## BANKTEST2X: the same tests with `$C007` on
+`dist/BANKTEST2X.po` turns on **INTCXROM** (`$C007`, internal slot ROM) before the 56 tests and off (`$C006`)
+before printing. Its title line reads "C800 BANKS, $C007 ON". It's for the 128EX (ROM 6.0), where BANKTEST2
+never reached chip `$6000` or `$6800`, although 6.0 has code in both and brackets some `$C800` calls with
+`$C007`/`$C006`. The 6.0 block sums are: `$6000` = 699E, `$6800` = 5D88 (all eight: `tools/c800banks.py`).

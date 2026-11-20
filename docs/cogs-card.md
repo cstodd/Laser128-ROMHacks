@@ -51,3 +51,12 @@ Power-cycle afterwards.
 **Result (Nov 2026): different bytes.** The bank switch works, so the card's I/O does reach it on the EX
 without the box, and the theory above is wrong. Why holding C gives no menu is still open. The menu is in the
 second bank, so the next step is to dump it (`software/carddump/README.md`, bank 2 routine).
+
+**Menu keys on hardware (Nov 2026):**
+- `PR#7`, then **tapping** C opens the CoGS menu. **Holding** C doesn't. So the card only sees a fresh keypress
+  (the `$C000` strobe), whatever the `$C010` logic suggests.
+- **From the boot menu's 7:** no menu, and also *no pause*, unlike `PR#7`. Likely cause: the 7 is still held
+  when the card starts. The card's poll reads it as digit choice 7 (`$51`) and ends its C/M window at once, and
+  that choice then fails fast.
+  - **Fix:** the boot menu now waits for the 5/7 key to be released before starting the card. 6.0X image CRC32
+    `4fb06d29`; not yet tested on hardware.

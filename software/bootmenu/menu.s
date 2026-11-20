@@ -65,6 +65,8 @@ SLN:    PHA
         JSR HASSLOT
         PLA
         BCC KEY
+WR7:    BIT $C010       ; wait until the 5/7 key is released: a card may read a held digit as its own
+        BMI WR7         ; choice (CoGS: 1-8) and skip its C/M menu window
         PHA
         JSR CLS
         PLA

@@ -246,12 +246,18 @@ def patch60():
 class Machine60(Sim):
     """6.0 main bank; $C800-$CFFF = chip $7800 (slot 6 helper bank); $C010 bit 7 = key held."""
     def __init__(s, rom, keys=(), held=False):
-        super().__init__(b'', 0x1000, keys); s.main[0xC100:0x10000] = rom[0x0100:0x4000]
+        super().__init__(b'', 0x1000, keys); s.main[0xC100:0x10000] = rom[0x0100:0x4000]; s.release_at = None
         s.main[0xC100:0xC800] = rom[0x4100:0x4800]          # slot pages as seen with $C006 (slot ROMs)
         s.main[0xC800:0xD000] = rom[BANK:BANK + 0x800]; s.held = held
         for a in (0xFB2F, 0xFE93, 0xFE89): s.main[a] = 0x60
     def rd(s, a):
-        if a == 0xC010: s.io.append(('R', a)); s.kbd &= 0x7F; return 0x80 if s.held else 0
+        if a == 0xC010:
+            s.io.append(('R', a)); s.kbd &= 0x7F
+            if getattr(s, 'release_after', None) is not None and not s.kbd & 0x80 and not s.keys:
+                # the typed key stays held for 1000 more $C010 reads, then is released
+                s.release_after += 1; s.held = s.release_after <= 1000
+                if s.release_after == 1001: s.release_at = len(s.io)
+            return 0x80 if s.held else 0
         if a == 0xBFFE: s.io.append(('R', a)); s.held = False
         if a in (0xCFFF, 0xC600, 0xC501, 0xC503, 0xC505, 0xC701, 0xC703, 0xC705): s.io.append(('R', a))
         return super().rd(a)
@@ -310,6 +316,12 @@ def check60(rom, orig, info):
     for n in (5, 7):
         m, pc = menu(str(n), slots=(5, 7), stop={0xC500, 0xC700})
         assert pc == 0xC000 + n * 0x100 and m.main[0] == 0 and m.main[1] == 0xC0 + n and m.io[-1][1] == 0xCFFF
+    # a card is started only once the 5/7 key is released (a CoGS card reads a held digit as its own choice)
+    m = Machine60(rom, keys=[ord('7')]); m.release_after = 0
+    m.main[0xC701], m.main[0xC703], m.main[0xC705] = 0x20, 0x00, 0x03
+    assert m.run(start=COPY60, stop={0xC700}, limit=3_000_000) == 0xC700
+    n = [i for i, e in enumerate(m.io) if e[1] == 0xC010]
+    assert m.release_at is not None and m.release_at < len(m.io) and len(n) > 1000, 'card started before 7 was released'
     fx = info['sym']['FIXUP']
     m, pc = menu('2', stop={0x1000}); assert pc == 0x1000
     assert [e[1] for e in m.io if e[1] in (0xCFFF, 0xC600)][-2:] == [0xCFFF, 0xC600]

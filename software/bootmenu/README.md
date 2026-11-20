@@ -56,6 +56,11 @@ The key routine and banner routine addresses differ (4.1: `$FA07`, `$CE35`; 4.2:
 "7  SLOT 7". Banner: "LASER 128 ROM Version 4.xX". **Not tested on hardware** (6.0X has been, on the New Laser
 128 S/N 151202).
 
+## ROM 6.1 (Laser 128EX/2)
+`roms/bootmenu/Laser128_6.1_bootmenu.bin`. Same patch, hooks at `$F9C1` and `$F9D1`. The menu path also runs 6.1's
+3.5" controller init (`$C71A`), as its cold start does before choosing a boot slot. Banner: "LASER 128EX/2 ROM
+Version 6.1X". Not yet tested on hardware.
+
 ## How it works (2.7, 2.9, 3.0)
 - **Banner:** 3.0's trailing space becomes `X`; 2.7 and 2.9 close up `128  ROM` to `128 ROM` to make room.
 - **Reset key check** (`$F9C0`; `$F9C3` in 3.0): the `CMP #$10 / BEQ` for P becomes `JMP $FAF5`. The 20 bytes

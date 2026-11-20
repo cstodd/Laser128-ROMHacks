@@ -21,6 +21,12 @@ with 3.0 on S/N 59554 (original Laser 128):**
   - **Not a real difference:** re-checked on the EX with 5 INT and 7 EXT, and the EX behaves the same. The CoGS
     boots by itself (6.0's cold start scans from slot 7), and the menu shows 5 (`/RAM5`). The earlier EX tests
     were with no drive mounted on the CoGS and with port 5 on EXT.
+- **ROM 6.1 (EX/2):** built from the same patch with its own profile. Not yet tested on hardware.
+  - **Hooks:** key `$F9C1 JSR $FA28` → KEYB; cold `$F9D1 JSR $CEB5` (banner, wait for release) → BOOTSEL.
+  - **Extra step:** on the menu path, `INIT7` (`$F379`) repeats the cold start's 3.5" controller init
+    (`BIT $CFFF`, `BIT $C700`, `STZ $CABC`, `$C71A` with X=3, Y=`$14`) before the menu.
+  - **Bank:** `$7800` is free from `$791F`, as in 6.0. Banner: "LASER 128EX/2 ROM Version 6.1X".
+  - **Labels:** 5 "SLOT 5 (RAM DISK OR CARD)", 7 "SLOT 7 (3.5 INCH DRIVE)".
 - **ROM 4.1–4.5 (New Laser 128):** built with the 6.0 patch, generalized (`NEW` profiles in `build.py`).
   - The model checks pass. The gaps were checked: the only hits are the same `STZ $F210,X` false positive as in
     6.0, and a `JSR $F220` just past the stub.

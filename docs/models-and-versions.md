@@ -116,5 +116,20 @@ Laser128EX-Expansion card project).
   - It has **only a port 5 INT/EXT switch**, no port 7 switch.
   - With the control panel's Boot Slot set to 7, it doesn't boot the FloppyEmu. The FloppyEmu can emulate a
     3.5" drive or a SmartPort device as well as a 5.25" drive, so which mode and port it's in matters.
+  - **Internal drive:** 5.25" (the owner doubts the 5.25" EX/2 is the rare one).
+  - **FloppyEmu on the rear "external drive" port, Boot Slot 7:**
+
+    | FloppyEmu mode | Result |
+    |---|---|
+    | Apple II 5.25 Floppy | no boot (it's drive 2; the autostart only boots drive 1) |
+    | **Apple II 3.5 Floppy** | **boots** (with an 800K image) |
+    | UniDisk 3.5 | no boot |
+    | SmartPort Hard Disk | no boot |
+
+    So the EX/2's slot 7 drives a plain (non-intelligent) 3.5" drive on the external port, not SmartPort devices.
+    With nothing bootable: "Unable to find a bootable disk".
+  - **Port 5 EXT:** `/RAM5` goes away. It seeks the internal floppy, then boots the FloppyEmu in 3.5" mode if
+    present. Without the FloppyEmu, it seeks the internal floppy, then boots a CoGS card in **slot 5**. So the
+    EX/2's expansion slot is slot 5 (the EX's is slot 7).
   - 6.1's reset code differs from 6.0's. After the banner it selects slot 7, calls `$C71A`, then `$FEE0` (boot
     slot choice), then `JMP ($0000)`. It needs its own patch.

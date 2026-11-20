@@ -202,9 +202,19 @@ NEW = {
     '4.2': dict(file='Laser128_4.2.bin', keyb=0xF75B, free0=0x78A0, banner='LASER 128  ROM Version 4.2 ', s7='7  SLOT 7'),
     '4.3': dict(file='Laser128_4.3.bin', keyb=0xF75B, free0=0x78A0, banner='LASER 128  ROM Version 4.3 ', s7='7  SLOT 7'),
     '4.5': dict(file='laser128-v4.5.bin', keyb=0xF75B, free0=0x78A0, banner='LASER 128  ROM Version 4.5 ', s7='7  SLOT 7'),
+    # 6.1 (EX/2): hooks 6 bytes later. Its cold start then runs the 3.5" controller init ($C71A with X=3, Y=$14,
+    # after BIT $CFFF / BIT $C700 / STZ $CABC) before choosing the boot slot, so the menu path runs that too
+    # (INIT7 in the $F379 gap) before entering the menu.
+    '6.1': dict(file='Laser128_EX2_6.1.bin', keyb=0xF758, free0=0x791F, banner='LASER 128EX/2  ROM Version 6.1',
+                newbanner='LASER 128EX/2 ROM Version 6.1X', s7='7  SLOT 7 (3.5 INCH DRIVE)',
+                key=0xF9C1, cold=0xF9D1, init=0xF379,
+                init_src='        BIT $CFFF\n        BIT $C700\n        STZ $CABC\n        LDX #$03\n        LDY #$14\n'
+                         '        JMP $C71A       ; as the cold start does at $F9D7-$F9E8\n'),
 }
 for _v, _p in NEW.items():
-    _p.update(ver=_v, key=0xF9BB, cold=0xF9CE, sel=0xF1AB, stub=0xF209, free=(_p['free0'], 0x7D00),
+    _p.setdefault('key', 0xF9BB); _p.setdefault('cold', 0xF9CE); _p.setdefault('init', None)
+    _p.setdefault('newbanner', 'LASER 128 ROM Version %sX' % _v)
+    _p.update(ver=_v, sel=0xF1AB, stub=0xF209, free=(_p['free0'], 0x7D00),
               copy=0xC800 + _p['free0'] - BANK, s5='5  SLOT 5 (RAM DISK OR CARD)')
 def gap_free(rom, addr, n): o = addr - 0xC000; return all(b == 0xFF for b in rom[o:o + n])
 
@@ -229,18 +239,20 @@ def patch_new(ver):
     keyb, _ = asm65.assemble(f'        CMP #$02\n        BNE K1\n        STZ $03F3\n        STZ $03F4\nK1:     JMP ${p["keyfn"]:04X}\n', p['keyb'])
     stub, _ = asm65.assemble(f'        JSR ${p["banfn"]:04X}       ; banner + wait for release, as normal\n        PLA\n        PLA\n'
                              f'        STA $C006       ; as the cold start does next\n'
-                             f'        LDA $CFFF\n        LDA $C600\n        JMP ${p['copy']:04X}\n', p['stub'])
+                             + (f'        JSR ${p["init"]:04X}       ; 3.5" controller init, as the cold start does\n' if p['init'] else '')
+                             + f'        LDA $CFFF\n        LDA $C600\n        JMP ${p["copy"]:04X}\n', p['stub'])
     sel, _ = asm65.assemble(f'        LDA $C010\n        BPL NORM\n        LDA $C000\n        AND #$1F\n        CMP #$02\n'
                             f'        BNE NORM\n        JMP ${p["stub"]:04X}\nNORM:   JMP ${p["banfn"]:04X}\n', p['sel'])
-    assert len(keyb) <= 17 and len(sel) <= 23 and len(stub) <= 23
-    for addr, blob in ((p['keyb'], keyb), (p['sel'], sel), (p['stub'], stub)):
+    init = asm65.assemble(p['init_src'], p['init'])[0] if p['init'] else b''
+    assert len(keyb) <= 17 and len(sel) <= 23 and len(stub) <= 23 and len(init) <= 23
+    for addr, blob in ((p['keyb'], keyb), (p['sel'], sel), (p['stub'], stub)) + (((p['init'], init),) if init else ()):
         assert gap_free(rom, addr, len(blob)), 'gap not free'; rom[o(addr):o(addr) + len(blob)] = blob
     rom[o(p['key']) + 1:o(p['key']) + 3] = bytes((p['keyb'] & 0xFF, p['keyb'] >> 8))
     rom[o(p['cold']) + 1:o(p['cold']) + 3] = bytes((p['sel'] & 0xFF, p['sel'] >> 8))
     hb = lambda t: bytes(c | 0x80 for c in t)
     old = hb(p['banner'].encode()); b = bytes(rom).find(old)
     assert b > 0 and bytes(rom).count(old) == 1 and rom[b + len(old)] == 0x8D, 'banner'
-    new = hb(('LASER 128 ROM Version %sX' % ver).encode()).ljust(len(old), b'\xa0')
+    new = hb(p['newbanner'].encode()).ljust(len(old), b'\xa0'); assert len(new) == len(old)
     rom[b:b + len(old)] = new; banner = (b, len(old))
     body, sym, notes = build_body_new(p, orig)
     f0, f1 = p['free']; src = p['copy'] + 0  # copier, then body
@@ -255,7 +267,7 @@ def patch_new(ver):
     assert start + pages * 256 <= 0xCF00, 'copier would read $CFxx'
     assert all(x == 0xFF for x in orig[f0:f1])
     rom[f0:f0 + len(cop)] = cop; rom[f0 + len(cop):f0 + len(cop) + len(body)] = body
-    info = dict(keyb=len(keyb), sel=len(sel), stub=len(stub), cop=len(cop), body=len(body), sym=sym, notes=notes,
+    info = dict(keyb=len(keyb), sel=len(sel), stub=len(stub), init=len(init), cop=len(cop), body=len(body), sym=sym, notes=notes,
                 body_bytes=body, banner=banner, room=f1 - f0 - len(cop) - len(body))
     return bytes(rom), orig, info
 
@@ -275,7 +287,7 @@ class Machine60(Sim):
                 if s.release_after == 1001: s.release_at = len(s.io)
             return 0x80 if s.held else 0
         if a == 0xBFFE: s.io.append(('R', a)); s.held = False
-        if a in (0xCFFF, 0xC600, 0xC501, 0xC503, 0xC505, 0xC701, 0xC703, 0xC705): s.io.append(('R', a))
+        if a in (0xCFFF, 0xC600, 0xC700, 0xC501, 0xC503, 0xC505, 0xC701, 0xC703, 0xC705): s.io.append(('R', a))
         return super().rd(a)
 
 def check_new(ver, rom, orig, info):
@@ -284,9 +296,10 @@ def check_new(ver, rom, orig, info):
     o = lambda a: a - 0xC000
     regions = [(o(p['key']) + 1, 2), (o(p['cold']) + 1, 2), (o(p['keyb']), info['keyb']),
                (o(p['sel']), info['sel']), (o(p['stub']), info['stub']), (p['free'][0], p['free'][1] - p['free'][0]),
-               info['banner']]
+               info['banner']] + ([(o(p['init']), info['init'])] if p['init'] else [])
     assert all(any(a <= i < a + n for a, n in regions) for i in diff), 'unexpected change'
-    t = bytes(c & 0x7F for c in rom[info['banner'][0]:info['banner'][0] + 27]); assert t.rstrip(b' ') == ('LASER 128 ROM Version %sX' % ver).encode() + b'\r' or t.startswith(('LASER 128 ROM Version %sX ' % ver).encode()), t
+    bo, bn = info['banner']; t = bytes(c & 0x7F for c in rom[bo:bo + bn + 1])
+    assert t == p['newbanner'].encode().ljust(bn) + b'\r', t
     # key search end: B clears the power-up bytes and goes on to $FA17; other keys leave them
     for key, clear in ((0x02, True), (0x01, False), (0x42, False)):
         m = Machine60(rom); m.main[0x3F3], m.main[0x3F4] = 0x12, 0x34; m.a = key
@@ -296,12 +309,15 @@ def check_new(ver, rom, orig, info):
     # it). B held at $F9CE -> $CE7C runs, then STA $C006, the bank select, and the copier. Otherwise back to $F9D1.
     def cold(held, kbd):
         m = Machine60(rom, held=held); m.kbd = kbd
-        m.main[p['banfn']:p['banfn'] + 4] = bytes.fromhex('adfebf60')           # LDA $BFFE / RTS
+        m.main[p['banfn']:p['banfn'] + 4] = bytes.fromhex('adfebf60')
+        if p['init']: m.main[0xC71A] = 0x60; m.main[0xCABC] = 0x55   # the 3.5" init itself: not modelled           # LDA $BFFE / RTS
         s0 = m.sp; pc = m.run(start=p['sel'], stop={p['copy']}); return m, pc, s0  # run's own return = the JSR's
     m, pc, s0 = cold(True, 0xC2); assert pc == p['copy'], hex(pc)
     assert ('R', 0xBFFE) in m.io, 'banner/wait routine ran'
-    seq = [e[1] for e in m.io if e[1] in (0xBFFE, 0xC006, 0xCFFF, 0xC600)]
-    assert seq[-4:] == [0xBFFE, 0xC006, 0xCFFF, 0xC600], seq
+    seq = [e[1] for e in m.io if e[1] in (0xBFFE, 0xC006, 0xCFFF, 0xC600, 0xC700)]
+    want = [0xBFFE, 0xC006] + ([0xCFFF, 0xC700] if p['init'] else []) + [0xCFFF, 0xC600]
+    assert seq[-len(want):] == want, seq
+    if p['init']: assert m.main[0xCABC] == 0 and (m.x, m.y) == (3, 0x14), '3.5" init ran with X=3, Y=$14'
     assert m.sp == s0 and not m.held, 'return address dropped'
     for held, kbd in ((False, 0xC2), (True, 0xD0)):          # $CE7C reached by tail call, returns to the caller
         m, pc, s0 = cold(held, kbd); assert pc != p['copy'] and ('R', 0xBFFE) in m.io, (held, kbd)

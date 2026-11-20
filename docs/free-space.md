@@ -150,3 +150,17 @@ to call main-bank `$C800` code; for example the speed keys call `$CE4F`, which w
 "Please eject disk from 1st 3.5" drive"), so `$6000`/`$6800` are probably **slot 7's** banks. On this EX, C7 selected
 nothing (all `$FF`, like an empty slot), which fits the **port 7 INT/EXT switch under the ROM door being on EXT**:
 internal slot 7 switched out, in favour of the expansion box. Next: set port 7 to INT and rerun BANKTEST2.
+
+**BANKTEST2 on the 128EX with port 7 set to INT:** the grid is the same as before except where C7 is involved.
+C7 now reaches something, but no ROM block or splice of two blocks matches any of the sums:
+
+| | alone | with C1 | with C2 | with C3 | with C5 | with C6 |
+|---|---|---|---|---|---|---|
+| Cx then C7 | A513 | CCAC | CD6A | 00C9 | D081 | D0F2 |
+| C7 then Cx | A513 | D09D | D119 | 025B | CDF3 | D2C9 |
+
+C7 alone, C4 with C7 and C7 twice all give A513, so the result is stable. Working theory: with C7 selected, the
+window shows **non-ROM space of the internal 3.5" controller** (the "Universal Disk Controller" array), probably
+RAM, with the other latches choosing which part. Unlike everywhere else, C3 doesn't override it. It also means
+6.0 must reach its `$6000`/`$6800` ROM another way, still to find. Next: monitor dumps of `$C800` after
+`CFFF C700`, `CFFF C100 C700` and `CFFF C700 C100`.

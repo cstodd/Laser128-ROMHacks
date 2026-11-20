@@ -109,4 +109,6 @@ Laser128EX-Expansion card project).
 - ~~Where the EX/2's MIDI port lives~~ **Answered:** the Port 2 serial connector (User's Guide). Still open: how
   the EX/2 gets 31,250 baud from that ACIA.
 - Which ROM version each model shipped with. The User's Guide doesn't say; machine labels will. So far:
-  original Laser 128 S/N 59554 = 2.7; owner's 128EX (S/N 1002869) = **6.0**. Still to check: the New Laser 128 and the EX/2.
+  original Laser 128 S/N 59554 = 2.7; owner's 128EX (S/N 1002869) = **6.0**. Owner's **New Laser 128, S/N 151202**: now runs ROM 6.0, put in by the owner. The owner thinks it
+  came with a 4.x, but isn't certain. Still to check: its board's `$C800` bank decoding (BANKTEST2) and the
+  EX/2 (6.1, owner has one).

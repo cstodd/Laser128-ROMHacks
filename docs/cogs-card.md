@@ -47,3 +47,7 @@ C800.C80F
 - **Different bytes:** the bank switch works, and the cause is elsewhere (for example, no network).
 
 Power-cycle afterwards.
+
+**Result (Nov 2026): different bytes.** The bank switch works, so the card's I/O does reach it on the EX
+without the box, and the theory above is wrong. Why holding C gives no menu is still open. The menu is in the
+second bank, so the next step is to dump it (`software/carddump/README.md`, bank 2 routine).

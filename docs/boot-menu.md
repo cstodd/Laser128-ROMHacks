@@ -14,6 +14,13 @@ with 3.0 on S/N 59554 (original Laser 128):**
     opens the CoGS menu.
   - **DOS 3.3 from the FloppyEmu (option 2):** switches to the internal drive after its first stage, as
     expected (it would need a DOS patch).
+- **New Laser 128, S/N 151202 (owner-installed ROM 6.0; has port 5/7 switches and an expansion RAM header): the
+  6.0X image (`4fb06d29`) passes the same tests as on the EX**, with no separate build. Two differences:
+  - **No speed keys:** there's no accelerator.
+  - **The CoGS on 7 EXT boots by itself, without the menu,** as on the original Laser 128. On the EX it didn't
+    (same 6.0 code). Not yet explained. 6.0's cold start always scans from slot 7, so the difference is probably
+    in the hardware or timing. One guess: the EX starts at 3.6 MHz and reaches the card before its network side
+    is ready.
 - **Earlier 6.0X, CRC32 `5627f1a7`:**
   - **The menu** comes up with B held at reset (the first build didn't; see the cold-start hook below).
   - **The EX's own reset keys** all still work.

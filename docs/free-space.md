@@ -164,3 +164,18 @@ window shows **non-ROM space of the internal 3.5" controller** (the "Universal D
 RAM, with the other latches choosing which part. Unlike everywhere else, C3 doesn't override it. It also means
 6.0 must reach its `$6000`/`$6800` ROM another way, still to find. Next: monitor dumps of `$C800` after
 `CFFF C700`, `CFFF C100 C700` and `CFFF C700 C100`.
+
+**Monitor dumps of `$C800–$C87F` with C7 selected (128EX, port 7 INT):** `CFFF C700`, `CFFF C100 C700` and
+`CFFF C700 C100` gave nearly the same bytes, mostly 1-bits with scattered 0s, but **individual bits differ
+between dumps** (e.g. `$C80C` = 6A / 6A / 7A, `$C80F` = 3F / FF / FF). So the low part of the C7 window is
+unstable memory or an undriven bus, not ROM, and the C7 checksums in BANKTEST2 were noise, not bank
+information. The slot 7 firmware writes here (`$C8F4–$C8F9`, `$CABC`), so it's probably the 3.5" controller's
+buffer, uninitialised since power-up.
+
+**Slot 7 firmware (6.0 alternate `$C700` page):** it calls `$CC03` (a jump table), `$CD4E`, `$CDD6`, `$CDF3`.
+The best fit for the top 1K of its window is chip `$6C00–$6FFF`: a `JMP` table at `$CC03`, and at `$CD4E`
+`LDA $C800,Y` / `STA $C08D,X`, a write loop from the RAM buffer to the drive. It also writes a mode register at
+**`$C0ED`** (`LDA $C0E8` then `$04`; elsewhere `STZ`, `ORA #$08`, save/restore). Code in chip `$6000`'s lower half
+runs at `$C98B`, so `$C0ED` probably also switches the low part of the window to ROM: that's likely how
+`$6000`/`$6800` are reached. Next: dump `CFFF C700 CC00.CC0F` (expect `4C C2 CD 4C 17 CD …` if it's chip
+`$6C00`), then a probe that writes `$C0ED` values.

@@ -25,8 +25,16 @@ with 3.0 on S/N 59554 (original Laser 128):**
 
     So the menu starts the card correctly. The card's own boot code finds nothing it can boot and falls back to
     slot 6. That's a card or compatibility issue, not a menu one.
-- **Original board:** a regression test of the current 2.7X/2.9X/3.0X images (with slot 5 and the release
-  wait) is next.
+- **Original board, current 3.0X (CRC32 `b7842da4`), regression-tested on S/N 59554:**
+  - B, P and M at startup work, and B brings up the menu.
+  - 1, B and M from the menu work.
+  - 2 boots ProDOS from the FloppyEmu and stays on drive 2.
+  - 7 appears only with the CoGS card in the slot, boots it after a short pause, and 7 then tapping C opens the
+    CoGS menu.
+  - Stacked mode still works.
+  - **Slot 5 can't be tested:** the original board has no slot 5/7 INT/EXT switches, and no memory card or RAM
+    disk is known for it. The option only appears if a slot 5 ROM answers with the boot signature, so it's
+    harmless.
 - **Not yet tried on hardware:** the 2.7 and 2.9 images, option 7 with a card, and DOS 3.3 from drive 2 (expected
   to switch to drive 1).
 

@@ -186,10 +186,13 @@ def check(ver, rom, orig, info):
 # 6.0 has no free 2K bank, and its power-up code differs, so it has its own patch (each patch site is
 # checked for the expected bytes before patching):
 #   $F9BB JSR $FA17   (end of the power-up key table search: A = key AND $1F) -> JSR KEYB (B forces a cold start)
-#   $F9DA JMP $FEE0   (cold start -> autostart scan of slots 7, 6, 5)       -> JMP BOOTSEL
+#   $F9CE JSR $CE7C   (cold start: banner, then WAITS FOR THE KEY TO BE RELEASED) -> JSR BOOTSEL. BOOTSEL checks
+#                     for B *before* that wait; with B it runs $CE7C itself, finishes the cold start's STA $C006,
+#                     and enters the menu. (A check at $F9DA, just before the autostart scan, never sees B: by
+#                     then it has been released. That was the first 6.0X build's bug.)
 #   chip $791F-$7CFF  free tail of the $C800 bank selected by $CFFF, $C600 (chip $7800, the slot 6 helper bank):
 #                     copier at $C91F, then the body: the drive-2 boot page (runs at $1000) and menu.s ($1100).
-V60 = dict(file='Laser128_6.0.bin', key=0xF9BB, cold=0xF9DA,
+V60 = dict(file='Laser128_6.0.bin', key=0xF9BB, cold=0xF9CE,
            keyb=0xF758, sel=0xF1AB, stub=0xF209, free=(0x791F, 0x7D00))
 COPY60 = 0xC800 + 0x791F - BANK
 def gap_free(rom, addr, n): o = addr - 0xC000; return all(b == 0xFF for b in rom[o:o + n])
@@ -206,11 +209,14 @@ def patch60():
     rom = bytearray(open(os.path.join(ROOT, 'roms', V60['file']), 'rb').read()); orig = bytes(rom)
     o = lambda a: a - 0xC000
     assert rom[o(V60['key']):o(V60['key']) + 3] == b'\x20\x17\xfa', 'key search end'
-    assert rom[o(V60['cold']):o(V60['cold']) + 3] == b'\x4c\xe0\xfe', 'cold start end'
+    assert rom[o(V60['cold']):o(V60['cold']) + 3] == b'\x20\x7c\xce', 'cold start banner call'
+    assert rom[o(V60['cold']) + 3:o(V60['cold']) + 12] == bytes.fromhex('8d06c06400a9c88501'), 'cold start tail'
     keyb, _ = asm65.assemble('        CMP #$02\n        BNE K1\n        STZ $03F3\n        STZ $03F4\nK1:     JMP $FA17\n', V60['keyb'])
-    stub, _ = asm65.assemble(f'        LDA $CFFF\n        LDA $C600\n        JMP ${COPY60:04X}\n', V60['stub'])
+    stub, _ = asm65.assemble(f'        JSR $CE7C       ; banner + wait for release, as normal\n        PLA\n        PLA\n'
+                             f'        STA $C006       ; as the cold start does next\n'
+                             f'        LDA $CFFF\n        LDA $C600\n        JMP ${COPY60:04X}\n', V60['stub'])
     sel, _ = asm65.assemble(f'        LDA $C010\n        BPL NORM\n        LDA $C000\n        AND #$1F\n        CMP #$02\n'
-                            f'        BNE NORM\n        JMP ${V60["stub"]:04X}\nNORM:   JMP $FEE0\n', V60['sel'])
+                            f'        BNE NORM\n        JMP ${V60["stub"]:04X}\nNORM:   JMP $CE7C\n', V60['sel'])
     assert len(keyb) <= 17 and len(sel) <= 23 and len(stub) <= 23
     for addr, blob in ((V60['keyb'], keyb), (V60['sel'], sel), (V60['stub'], stub)):
         assert gap_free(rom, addr, len(blob)), 'gap not free'; rom[o(addr):o(addr) + len(blob)] = blob
@@ -246,6 +252,7 @@ class Machine60(Sim):
         for a in (0xFB2F, 0xFE93, 0xFE89): s.main[a] = 0x60
     def rd(s, a):
         if a == 0xC010: s.io.append(('R', a)); s.kbd &= 0x7F; return 0x80 if s.held else 0
+        if a == 0xBFFE: s.io.append(('R', a)); s.held = False
         if a in (0xCFFF, 0xC600, 0xC501, 0xC503, 0xC505, 0xC701, 0xC703, 0xC705): s.io.append(('R', a))
         return super().rd(a)
 
@@ -262,13 +269,22 @@ def check60(rom, orig, info):
         m = Machine60(rom); m.main[0x3F3], m.main[0x3F4] = 0x12, 0x34; m.a = key
         assert m.run(start=V60['key'], stop={0xFA17}) == 0xFA17
         assert ((m.main[0x3F3], m.main[0x3F4]) == (0, 0)) == clear, key
-    # cold start end: B held -> copier; else the autostart scan with $00/$01 untouched
-    m = Machine60(rom, held=True); m.kbd = 0xC2
-    assert m.run(start=V60['cold'], stop={COPY60, 0xFEE0}) == COPY60
-    assert [e[1] for e in m.io if e[1] in (0xCFFF, 0xC600)][-2:] == [0xCFFF, 0xC600]
-    m = Machine60(rom, held=False); assert m.run(start=V60['cold'], stop={COPY60, 0xFEE0}) == 0xFEE0
-    m = Machine60(rom, held=True); m.kbd = 0xD0
-    assert m.run(start=V60['cold'], stop={COPY60, 0xFEE0}) == 0xFEE0, 'other key held: normal'
+    # cold start: $CE7C prints the banner and waits until the key is released (modelled: reading $BFFE releases
+    # it). B held at $F9CE -> $CE7C runs, then STA $C006, the bank select, and the copier. Otherwise back to $F9D1.
+    def cold(held, kbd):
+        m = Machine60(rom, held=held); m.kbd = kbd
+        m.main[0xCE7C:0xCE80] = bytes.fromhex('adfebf60')           # LDA $BFFE / RTS
+        s0 = m.sp; pc = m.run(start=V60['sel'], stop={COPY60}); return m, pc, s0  # run's own return = the JSR's
+    m, pc, s0 = cold(True, 0xC2); assert pc == COPY60, hex(pc)
+    assert ('R', 0xBFFE) in m.io, 'banner/wait routine ran'
+    seq = [e[1] for e in m.io if e[1] in (0xBFFE, 0xC006, 0xCFFF, 0xC600)]
+    assert seq[-4:] == [0xBFFE, 0xC006, 0xCFFF, 0xC600], seq
+    assert m.sp == s0 and not m.held, 'return address dropped'
+    for held, kbd in ((False, 0xC2), (True, 0xD0)):          # $CE7C reached by tail call, returns to the caller
+        m, pc, s0 = cold(held, kbd); assert pc != COPY60 and ('R', 0xBFFE) in m.io, (held, kbd)
+        assert not any(e[1] in (0xC006, 0xCFFF, 0xC600) for e in m.io), 'normal path untouched'
+    # and the hook site itself: JSR BOOTSEL
+    assert rom[o(V60['cold']):o(V60['cold']) + 3] == bytes((0x20, V60['sel'] & 0xFF, V60['sel'] >> 8))
     def menu(keys, slots=(), stop=()):
         m = Machine60(rom, keys=[ord(c) for c in keys])
         for n in (5, 7):

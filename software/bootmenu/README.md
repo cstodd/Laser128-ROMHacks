@@ -34,8 +34,10 @@ use: hold B at power-on or Ctrl-Reset. The menu has the same choices, plus:
 The EX's own reset keys (P/0 control panel, M/Return monitor, 1/2/3 speed, space) are unchanged. Banner: "LASER
 128 ROM Version 6.0X".
 - **Hooks:** `$F9BB JSR $FA17` (after the reset-key table search) → KEYB at `$F758`: B clears `$03F3/$03F4` for a
-  cold start. `$F9DA JMP $FEE0` (start of the autostart scan) → BOOTSEL at `$F1AB`: if B is still held, the stub
-  at `$F209` reads `$CFFF`, `$C600` (chip `$7800` on the EX) and jumps to the copier at `$C91F`; otherwise `JMP $FEE0`.
+  cold start. `$F9CE JSR $CE7C` (banner, then a wait for the key to be released) → BOOTSEL at `$F1AB`, which checks
+  for B *before* that wait. If B is held, the stub at `$F209` runs `$CE7C`, does `STA $C006`, reads `$CFFF`,
+  `$C600` (chip `$7800` on the EX) and jumps to the copier at `$C91F`. Otherwise it goes on to `$CE7C` as normal.
+  So the menu appears when you **release** B.
 - **Bank:** chip `$7800` holds 6.0's slot 6 helpers up to `$791E`. The copier and body use the free tail. The body
   is the drive-2 boot page (run at `$1000`) and `menu.s` (at `$1100`).
 - **5 and 7** start the way 6.0's autostart does: `$00/$01 = $Cn00`, `JMP ($0000)`, after the same signature test.

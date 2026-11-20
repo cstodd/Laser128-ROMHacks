@@ -109,14 +109,20 @@ Started Nov 2026 (survey of 3.3–6.1). Next: the ROM version in the owner's New
 ### ROM 6.0 (128EX): plan as built, Nov 2026
 - **Key hook:** `$F9BB JSR $FA17` (taken when no table key matched; A = key AND `$1F`) → `JSR KEYB`. KEYB (13 bytes):
   if A = `$02` (B), `STZ $03F3`, `STZ $03F4` to force the cold path, then `JMP $FA17`.
-- **Cold-start hook:** `$F9DA JMP $FEE0` → `JMP BOOTSEL`. `$FEE0` is the autostart scan: slots 7, 6, 5 by
-  signature (`$Cn01=$20`, `$Cn03=$00`, `$Cn05=$03`), then `JMP $CF4A` ("Unable to find a bootable disk").
-  BOOTSEL: if B is still held, select the menu bank and enter; otherwise `JMP $FEE0`.
+- **Cold-start hook:** `$F9CE JSR $CE7C` → `JSR BOOTSEL`. `$CE7C` prints the banner and then **waits until the
+  key is released** (`$CEA4: LDA $C010 / BMI`). The original ROMs have no such wait. BOOTSEL checks for B before
+  that wait. With B it calls `$CE7C` itself (banner, wait), drops its own return address, does the cold start's
+  next step (`STA $C006`), selects the menu bank and enters the copier. Otherwise it tail-calls `$CE7C` and the
+  cold start carries on into the autostart scan at `$FEE0` (slots 7, 6, 5 by signature, else `JMP $CF4A`
+  "Unable to find a bootable disk").
+  - **First build's bug (hardware, Nov 2026):** the first 6.0X hooked `$F9DA JMP $FEE0`, after the wait, so it
+    never saw B. Holding B only paused the banner, then the internal drive booted. The model check now has
+    `$CE7C` release the key, which would have caught it.
 - **Menu bank:** chip `$7800` (C6 alone on the EX), free from chip `$791F` (993 bytes, `$C91F–$CCFF`). Stub:
-  `LDA $CFFF`, `LDA $C600`, `JMP` into it. The menu copies itself to RAM as on the original board.
+  `LDA $CFFF`, `LDA $C600`, `JMP` into it (after `$CE7C` and `STA $C006`). The menu copies itself to RAM as on the original board.
 - **Gaps:** `$F1AB`, `$F209`, `$F379` (23 bytes each) and `$F758` (17 bytes), all `$FF`. The reference scan
   turned up one hit, `STZ $F210,X` at chip `$287F`. It's a false positive: it sits mid-instruction in a
-  `ROL $9E / BPL` sequence. Used: BOOTSEL (20 bytes) at `$F1AB`, the bank-select stub (9) at `$F209`, KEYB (13)
+  `ROL $9E / BPL` sequence. Used: BOOTSEL (20 bytes) at `$F1AB`, the menu entry stub (17) at `$F209`, KEYB (13)
   at `$F758`. `$F379` is still free.
 - **Choices:**
   - **1** internal 5.25" (slot 6);

@@ -189,3 +189,17 @@ Theory: **bits `$04`/`$08` of `$C0ED`** (which the 3.5" firmware sets) page the 
 `$6800`, `$6C00`) into the same 1K, giving the 3.5" firmware 4K (chip `$6000–$6FFF`) behind slot 7. To test from
 the monitor: `C0E8 C0ED:04 CFFF C700 CC00.CC07` (then 08, 0C; restore with `C0E8 C0ED:00`). Expected at `$CC00`:
 `$04` → AE D4 CB BD…, `$08` → 4C 6C CF 4C…, `$0C` → 4C C2 CD 4C….
+
+**Correction: `$C0ED` bits 0–3 are the disk controller's mode bits; bits 4–6 page the ROM slice.** Monitor tests
+writing `$04`/`$08`/`$0C` to `$C0ED` left `$CC00` showing chip `$6000`. The 6.0 slot 7 page explains why:
+- `$C76F` builds the new value as `($CACC AND #$8F) OR page`, with `page = bits 4–6` (the callers use
+  `AND #$70`);
+- `$C7B5` writes it as `CMP $C0E8` (motor off), `CMP $C0ED`, `STA $C0ED`, keeps a copy in RAM at `$CACC`, then
+  writes `$CAD0` to `$C0EC` and turns the motor back on if it was on;
+- elsewhere, `ORA #$08` sets mode bit 3 (fast 3.5" timing on an IWM-style controller), and `$C799` sets or clears
+  bit 7.
+
+So bits 4–5 (perhaps 6) should select the 1K slice at `$CC00`: `$00` → chip `$6000`, `$10` → `$6400`, `$20` →
+`$6800`, `$30` → `$6C00`. The dispatcher at `$C739` takes a command byte, pages in the slice named by its upper
+bits, and jumps through a table at `$CCxx`. Monitor test: `C0EE C0EC C0E8`, `C0ED`, `C0ED:10`,
+`CFFF C700 CC00.CC07` (one per line).

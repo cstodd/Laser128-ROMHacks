@@ -179,3 +179,13 @@ The best fit for the top 1K of its window is chip `$6C00–$6FFF`: a `JMP` table
 runs at `$C98B`, so `$C0ED` probably also switches the low part of the window to ROM: that's likely how
 `$6000`/`$6800` are reached. Next: dump `CFFF C700 CC00.CC0F` (expect `4C C2 CD 4C 17 CD …` if it's chip
 `$6C00`), then a probe that writes `$C0ED` values.
+
+**`CFFF C700 CC00.CC0F` on the 128EX:** `4C 03 CC A9 07 20 DC C7 10 07 A9 2F 38 60 4C D3`. That's chip
+**`$6000`**; one byte was read as 39 for 38. Chip `$6000` starts with `JMP $CC03`, which only makes sense at
+`$CC00`. So the **slot 7 window is 1K of buffer RAM at `$C800–$CBFF` plus a 1K ROM slice at `$CC00–$CFFF`**,
+here chip `$6000–$63FF`.
+
+Theory: **bits `$04`/`$08` of `$C0ED`** (which the 3.5" firmware sets) page the other slices (chip `$6400`,
+`$6800`, `$6C00`) into the same 1K, giving the 3.5" firmware 4K (chip `$6000–$6FFF`) behind slot 7. To test from
+the monitor: `C0E8 C0ED:04 CFFF C700 CC00.CC07` (then 08, 0C; restore with `C0E8 C0ED:00`). Expected at `$CC00`:
+`$04` → AE D4 CB BD…, `$08` → 4C 6C CF 4C…, `$0C` → 4C C2 CD 4C….

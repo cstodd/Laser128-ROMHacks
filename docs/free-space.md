@@ -207,3 +207,24 @@ bits, and jumps through a table at `$CCxx`. Monitor test: `C0EE C0EC C0E8`, `C0E
 **Confirmed on the 128EX (6.0):** after `C0EE C0EC C0E8`, `C0ED`, `C0ED:10`, then `CFFF C700 CC00.CC07` reads
 `AE D4 CB BD FB C8 C9 02`, which is **chip `$6400`**. `$C0ED` bits 4–6 page the 1K ROM slice behind slot 7. (`$20`,
 `$30` and bit 6 still to check.)
+
+**Confirmed: `$20` → chip `$6800`, `$30` → chip `$6C00`.** On the 128EX (6.0), with port 7 set to INT, slot 7's `$C800`
+window is:
+- `$C800–$CBFF`: 1K buffer RAM (uninitialised, contents drift at power-up);
+- `$CC00–$CFFF`: one 1K ROM slice chosen by `$C0ED` bits 4–5: `$00` → `$6000`, `$10` → `$6400`, `$20` → `$6800`,
+  `$30` → `$6C00` (bit 6 untested).
+
+Write `$C0ED` like the firmware does: `CMP $C0E8`, `CMP $C0ED`, `STA $C0ED`, keeping bits 0–3 (controller mode) and
+bit 7. That accounts for all of 6.0's ROM:
+
+| Chip | Reached by |
+|---|---|
+| `$0000–$3FFF` | main bank |
+| `$4000–$47FF` | alternate slot pages |
+| `$4800` | C1 |
+| `$5000` | C5 |
+| `$5800` | C2 |
+| `$6000–$6FFF` | **C7 + `$C0ED` page**, 1K at `$CC00` |
+| `$7000` | C5 + C6 |
+| `$7800` | C6 |
+| `$0800` | C3 |

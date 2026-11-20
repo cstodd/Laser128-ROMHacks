@@ -59,7 +59,8 @@ second bank, so the next step is to dump it (`software/carddump/README.md`, bank
   when the card starts. The card's poll reads it as digit choice 7 (`$51`) and ends its C/M window at once, and
   that choice then fails fast.
   - **Fix:** the boot menu now waits for the 5/7 key to be released before starting the card. 6.0X image CRC32
-    `4fb06d29`; not yet tested on hardware.
+    `4fb06d29`. **Confirmed on hardware:** 7 boots the card's mounted S7,D1 disk, and 7 then tapping C opens the
+    CoGS menu.
 - **Network connected** (the card's light solid, Wi-Fi up): it still doesn't boot from `PR#7` or the menu's 7.
   The cause isn't known yet. In the bank-1 code, the boot attempt ends early on error `$10` or `$0B` and then
   falls back. What those mean, and what the card needs (a server, a configured boot target), is in code we

@@ -7,7 +7,14 @@ with 3.0 on S/N 59554 (original Laser 128):**
   switched to the internal drive as predicted. With the FIXUP version: **boots and stays on drive 2.**
 - **Banner:** "3.0X" banner version tested.
 - **Quad Hi-Res:** still works with the new ROM (DHGRTEST2).
-- **ROM 6.0 (128EX), tested on the user's EX (6.0X, CRC32 `5627f1a7`):**
+- **ROM 6.0 (128EX), current image CRC32 `4fb06d29` (waits for the 5/7 key to be released), all tested on the
+  user's EX:**
+  - 1, 2, B, M and the EX's reset keys work as expected.
+  - **7 with a CoGS card** (S7,D1 mounted in the card's menu) boots it, the same as `PR#7`. Tapping C after 7
+    opens the CoGS menu.
+  - **DOS 3.3 from the FloppyEmu (option 2):** switches to the internal drive after its first stage, as
+    expected (it would need a DOS patch).
+- **Earlier 6.0X, CRC32 `5627f1a7`:**
   - **The menu** comes up with B held at reset (the first build didn't; see the cold-start hook below).
   - **The EX's own reset keys** all still work.
   - **1 (internal) and 2 (FloppyEmu on the external port)** both boot as chosen.
@@ -18,6 +25,8 @@ with 3.0 on S/N 59554 (original Laser 128):**
 
     So the menu starts the card correctly. The card's own boot code finds nothing it can boot and falls back to
     slot 6. That's a card or compatibility issue, not a menu one.
+- **Original board:** a regression test of the current 2.7X/2.9X/3.0X images (with slot 5 and the release
+  wait) is next.
 - **Not yet tried on hardware:** the 2.7 and 2.9 images, option 7 with a card, and DOS 3.3 from drive 2 (expected
   to switch to drive 1).
 

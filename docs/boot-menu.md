@@ -12,6 +12,11 @@ with 3.0 on S/N 59554 (original Laser 128):**
   - 1, 2, B, M and the EX's reset keys work as expected.
   - **7 with a CoGS card** (S7,D1 mounted in the card's menu) boots it, the same as `PR#7`. Tapping C after 7
     opens the CoGS menu.
+  - **Why the menu waits for 5/7 to be released:** a CoGS card polls the keyboard for about a second as it
+    starts. It takes C or M as its config menu and a digit 1–8 as its own boot choice. With the first 6.0X, the
+    7 was still held when the card started, so it booted "device 7" and fell back at once, with no pause. The
+    card only sees a fresh keypress, so tap C rather than holding it. It also needs a drive mounted from its
+    server in that menu before it will boot.
   - **DOS 3.3 from the FloppyEmu (option 2):** switches to the internal drive after its first stage, as
     expected (it would need a DOS patch).
 - **New Laser 128, S/N 151202 (owner-installed ROM 6.0; has port 5/7 switches and an expansion RAM header): the

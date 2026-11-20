@@ -90,6 +90,8 @@ class Sim:
             elif op == 0x88: s.y = s.nz(s.y - 1); n = 1
             elif op == 0xE6: s.main[b1] = s.nz(s.main[b1] + 1); n = 2
             elif op == 0xC6: s.main[b1] = s.nz(s.main[b1] - 1); n = 2
+            elif op == 0xEE: s.wr(w, s.nz(s.rd(w) + 1)); n = 3
+            elif op == 0xCE: s.wr(w, s.nz(s.rd(w) - 1)); n = 3
             elif op == 0x98: s.a = s.nz(s.y); n = 1
             elif op == 0x8A: s.a = s.nz(s.x); n = 1
             elif op == 0xA8: s.y = s.nz(s.a); n = 1

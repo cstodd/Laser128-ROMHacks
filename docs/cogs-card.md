@@ -60,3 +60,7 @@ second bank, so the next step is to dump it (`software/carddump/README.md`, bank
   that choice then fails fast.
   - **Fix:** the boot menu now waits for the 5/7 key to be released before starting the card. 6.0X image CRC32
     `4fb06d29`; not yet tested on hardware.
+- **Network connected** (the card's light solid, Wi-Fi up): it still doesn't boot from `PR#7` or the menu's 7.
+  The cause isn't known yet. In the bank-1 code, the boot attempt ends early on error `$10` or `$0B` and then
+  falls back. What those mean, and what the card needs (a server, a configured boot target), is in code we
+  don't have yet: the second bank (`software/carddump/`) and the card's own firmware.

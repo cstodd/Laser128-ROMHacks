@@ -132,6 +132,9 @@ Laser128EX-Expansion card project).
     the monitor): **1 device.** Its DIB reads `F8 00 08 00 07 52 41 4D…`: status `$F8`, `$000800` blocks (1 MB),
     name of 7 characters starting "RAM". So slot 5's SmartPort firmware serves only the RAM disk. It doesn't
     see SmartPort devices on the external drive port the way an Apple //c's slot 5 does.
+  - **Slot 7 SmartPort test** (`$C70D`, FloppyEmu still in SmartPort Hard Disk mode): no error, **0 devices.**
+    So **neither slot supports SmartPort bus devices** (UniDisk 3.5, SmartPort hard disks) on the EX/2. The
+    external port takes a 5.25" drive or a plain 3.5" drive.
   - **Port 5 EXT:** `/RAM5` goes away. It seeks the internal floppy, then boots the FloppyEmu in 3.5" mode if
     present. Without the FloppyEmu, it seeks the internal floppy, then boots a CoGS card in **slot 5**. So the
     EX/2's expansion slot is slot 5 (the EX's is slot 7).

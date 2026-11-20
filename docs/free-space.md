@@ -181,7 +181,7 @@ runs at `$C98B`, so `$C0ED` probably also switches the low part of the window to
 `$6C00`), then a probe that writes `$C0ED` values.
 
 **`CFFF C700 CC00.CC0F` on the 128EX:** `4C 03 CC A9 07 20 DC C7 10 07 A9 2F 38 60 4C D3`. That's chip
-**`$6000`**; one byte was read as 39 for 38. Chip `$6000` starts with `JMP $CC03`, which only makes sense at
+**`$6000`**, an exact match. Chip `$6000` starts with `JMP $CC03`, which only makes sense at
 `$CC00`. So the **slot 7 window is 1K of buffer RAM at `$C800–$CBFF` plus a 1K ROM slice at `$CC00–$CFFF`**,
 here chip `$6000–$63FF`.
 

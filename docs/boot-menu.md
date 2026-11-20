@@ -52,8 +52,9 @@ with 3.0 on S/N 59554 (original Laser 128):**
   - **Through an expansion box: slot 5 works.** On an a2heaven replica of the Laser expansion box, with the CoGS
     in the box's "Slot 5": the menu shows 5, and 5 boots the card. So the box decodes slot 5 itself, matching the
     owner's memory of booting slot 5 through the box in the 1980s.
-- **Not tried on hardware:** DOS 3.3 from drive 2 on the original
-  board. On the EX it switched to drive 1 as expected.
+- **DOS 3.3 from drive 2:** on both machines it switches to the internal drive after its first stage, as
+  expected. DOS's own disk code uses drive 1, so it would need a DOS patch.
+- **Every menu choice has now been tested on hardware on both machines.**
 
 **Goal:** choose the boot device at power-up or reset, especially the **external** 5.25" port, so a FloppyEmu or
 second drive can boot without opening the machine.

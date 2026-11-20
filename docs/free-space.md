@@ -213,8 +213,13 @@ window is:
 - `$C800–$CBFF`: 1K buffer RAM (uninitialised, contents drift at power-up);
 - `$CC00–$CFFF`: one 1K ROM slice chosen by `$C0ED` bits 4–5: `$00` → `$6000`, `$10` → `$6400`, `$20` → `$6800`,
   `$30` → `$6C00`, and **`$40` → `$7000`** (confirmed, Nov 2026, EX S/N 1002869: `4C 40 CD 4C 5D CF 4C 34`). So
-  bits 4–6 together select one of eight 1K slices of chip `$6000–$7FFF`. `$50`–`$70` (expected `$7400`, `$7800`,
-  `$7C00`) haven't been read on hardware. That second 4K is also reachable as the C5+C6 and C6 banks.
+  bits 4–6 together select one of eight 1K slices of chip `$6000–$7FFF`. That second 4K is also reachable as the C5+C6 and C6 banks.
+  - **`$50`, `$60`, `$70`: all `FF` at `$CC00` on hardware** (Nov 2026). `$60` and `$70` fit: the firmware never
+    asks for those pages.
+  - **`$50` doesn't fit.** The firmware's dispatcher (`$C739`: page = command `LSR` `AND #$70`) is called with
+    commands `$A0–$A3`, page `$50`, from five places, in the `$6800`, `$6C00` and `$7000` slices. Chip `$7400`
+    starts with a matching jump table (`4C A2 CE 4C 2D CD 4C 39 …`). To re-check on hardware. Pages the
+    firmware uses: `$00` (3 calls), `$10` (1), `$20` (5), `$30` (3), `$40` (5), `$50` (5).
 
 Write `$C0ED` like the firmware does: `CMP $C0E8`, `CMP $C0ED`, `STA $C0ED`, keeping bits 0–3 (controller mode) and
 bit 7. That accounts for all of 6.0's ROM:

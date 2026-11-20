@@ -12,8 +12,12 @@ with 3.0 on S/N 59554 (original Laser 128):**
   - **The EX's own reset keys** all still work.
   - **1 (internal) and 2 (FloppyEmu on the external port)** both boot as chosen.
   - **A CoGS card in the external slot, with option 7:** the internal drive booted instead. This was without
-    the Laser expansion box, and the CoGS isn't documented as Laser-compatible. Not yet known: whether the
-    card's ROM was visible at `$C700` at all, or the internal 3.5" firmware ran and fell through to slot 6.
+    the Laser expansion box, and the CoGS isn't documented as Laser-compatible. Follow-up:
+    - `$C700` reads differently with the switch on EXT and INT, so the card's ROM is visible.
+    - `PR#7` and `7` Ctrl-P in the monitor do the same thing: a short pause, then the internal drive.
+
+    So the menu starts the card correctly. The card's own boot code finds nothing it can boot and falls back to
+    slot 6. That's a card or compatibility issue, not a menu one.
 - **Not yet tried on hardware:** the 2.7 and 2.9 images, option 7 with a card, and DOS 3.3 from drive 2 (expected
   to switch to drive 1).
 

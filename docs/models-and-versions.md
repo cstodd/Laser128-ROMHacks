@@ -135,14 +135,22 @@ Laser128EX-Expansion card project).
   - **Slot 7 SmartPort test** (`$C70D`, FloppyEmu still in SmartPort Hard Disk mode): no error, **0 devices.**
     So **neither slot supports SmartPort bus devices** (UniDisk 3.5, SmartPort hard disks) on the EX/2. The
     external port takes a 5.25" drive or a plain 3.5" drive.
-  - **Fits published notes on the Laser UDC** (online summary of BMOW's "Unlocking the Secrets of the UDC Disk
-    Controller", Dec 2020, as quoted by the owner; the article itself not yet read here):
-    - early UDC revisions had preliminary SmartPort bus support, removed later;
-    - ROM 4.5 has it and works with a FloppyEmu in SmartPort mode, connected directly (no daisy-chaining);
-    - ROM 6 has the later UDC without it, leaving 3.5" drive emulation.
+  - **Fits BMOW's findings.** Steve Chamberlin, "Unlocking the Secrets of the UDC Disk Controller", Big Mess o'
+    Wires, 24 Dec 2020; saved as `docs/ref/BMOW - Unlocking the Secrets of the UDC Disk Controller (2020).pdf`.
+    - **The UDC card:** long-card firmware 2.1 and 2.3 has SmartPort drive support, but no daisy-chaining.
+      Short-card 3.0 and 4.0 has daisy-chaining, but the SmartPort support is gone. The firmware version is the
+      byte at `$C615` (with the card in slot 6), read as hex digits ($20 = 2.0).
+    - **Laser ROMs (Steve, in the comments):** the SmartPort enable sequence (PH1 and PH3 both on) is in **4.2
+      and 4.5, but not in 6.0 or 6.1**. His conclusion: support was dropped between 4.5 and 6.0.
+    - **Tom Greene (comments):**
+      - SmartPort works on a red-label Laser 128 with 4.2 and a 128EX with 4.5, **in slot 7**, but not on an
+        early gold-label Laser 128 (ROM dated 860801);
+      - a first claim that the EX/2's 6.1 works was withdrawn after re-testing.
+    - **Joshua Bell (comments):** a 128EX with ROM 4.2 reaches a directly connected FloppyEmu in SmartPort mode,
+      but not one daisy-chained after an Apple 3.5 drive.
 
-    The EX/2 (6.1) tests above agree. Possible check: the 4.5X boot-menu image with a FloppyEmu in SmartPort
-    mode.
+    **Our results agree:** 6.1 sees no SmartPort devices in slot 5 or 7. To check: the 4.5X (or 4.2X) boot menu
+    image with a FloppyEmu in SmartPort mode, connected directly, using option 7.
   - **Port 5 EXT:** `/RAM5` goes away. It seeks the internal floppy, then boots the FloppyEmu in 3.5" mode if
     present. Without the FloppyEmu, it seeks the internal floppy, then boots a CoGS card in **slot 5**. So the
     EX/2's expansion slot is slot 5 (the EX's is slot 7).

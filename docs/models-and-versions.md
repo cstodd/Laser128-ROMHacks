@@ -112,3 +112,9 @@ Laser128EX-Expansion card project).
   original Laser 128 S/N 59554 = 2.7; owner's 128EX (S/N 1002869) = **6.0**. Owner's **New Laser 128, S/N 151202**: now runs ROM 6.0, put in by the owner. The owner thinks it
   came with a 4.x, but isn't certain. It has port 5/7 INT/EXT switches and an expansion RAM header. Still to check: its board's `$C800` bank decoding (BANKTEST2) and the
   EX/2 (6.1, owner has one).
+- **Owner's EX/2 (ROM 6.1), first notes (Nov 2026):**
+  - It has **only a port 5 INT/EXT switch**, no port 7 switch.
+  - With the control panel's Boot Slot set to 7, it doesn't boot the FloppyEmu. The FloppyEmu can emulate a
+    3.5" drive or a SmartPort device as well as a 5.25" drive, so which mode and port it's in matters.
+  - 6.1's reset code differs from 6.0's. After the banner it selects slot 7, calls `$C71A`, then `$FEE0` (boot
+    slot choice), then `JMP ($0000)`. It needs its own patch.

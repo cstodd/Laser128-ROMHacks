@@ -103,3 +103,24 @@ Started Nov 2026 (survey of 3.3–6.1). Next: the ROM version in the owner's New
 
   A boot-menu key (B = `$02`) would be a seventh entry. The table is inline at `$F9FD`, so adding one means
   moving the table or adding a compare in a free gap.
+
+### Plan for ROM 6.0 (128EX), Nov 2026
+- **Key hook:** `$F9BB JSR $FA17` (taken when no table key matched; A = key AND `$1F`) → `JSR KEYB`. KEYB (13 bytes):
+  if A = `$02` (B), `STZ $03F3`, `STZ $03F4` to force the cold path, then `JMP $FA17`.
+- **Cold-start hook:** `$F9DA JMP $FEE0` → `JMP BOOTSEL`. `$FEE0` is the autostart scan: slots 7, 6, 5 by
+  signature (`$Cn01=$20`, `$Cn03=$00`, `$Cn05=$03`), then `JMP $CF4A` ("Unable to find a bootable disk").
+  BOOTSEL: if B is still held, select the menu bank and enter; otherwise `JMP $FEE0`.
+- **Menu bank:** chip `$7800` (C6 alone on the EX), free from chip `$791F` (993 bytes, `$C91F–$CCFF`). Stub:
+  `LDA $CFFF`, `LDA $C600`, `JMP` into it. The menu copies itself to RAM as on the original board.
+- **Gaps:** `$F1AB`, `$F209`, `$F379` (23 bytes each) and `$F758` (17 bytes). Check them for references first,
+  as was done for the original-board gaps.
+- **Choices:**
+  - **1** internal 5.25" (slot 6);
+  - **2** external 5.25" (RAM copy of the slot 6 boot page with drive 2, plus the ProDOS FIXUP);
+  - **5** `/RAM5` (slot 5);
+  - **7** 3.5" (slot 7);
+  - **B** BASIC, **M** monitor.
+
+  Show 5 and 7 only when their signatures answer; they start through `JMP $Cn00`, as the autostart does.
+- **Build:** extend `software/bootmenu/build.py` with a 6.0 profile (different hooks and bank select), and check
+  in the model as for 2.7, 2.9 and 3.0.

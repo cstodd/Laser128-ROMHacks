@@ -135,6 +135,14 @@ Laser128EX-Expansion card project).
   - **Slot 7 SmartPort test** (`$C70D`, FloppyEmu still in SmartPort Hard Disk mode): no error, **0 devices.**
     So **neither slot supports SmartPort bus devices** (UniDisk 3.5, SmartPort hard disks) on the EX/2. The
     external port takes a 5.25" drive or a plain 3.5" drive.
+  - **Fits published notes on the Laser UDC** (online summary of BMOW's "Unlocking the Secrets of the UDC Disk
+    Controller", Dec 2020, as quoted by the owner; the article itself not yet read here):
+    - early UDC revisions had preliminary SmartPort bus support, removed later;
+    - ROM 4.5 has it and works with a FloppyEmu in SmartPort mode, connected directly (no daisy-chaining);
+    - ROM 6 has the later UDC without it, leaving 3.5" drive emulation.
+
+    The EX/2 (6.1) tests above agree. Possible check: the 4.5X boot-menu image with a FloppyEmu in SmartPort
+    mode.
   - **Port 5 EXT:** `/RAM5` goes away. It seeks the internal floppy, then boots the FloppyEmu in 3.5" mode if
     present. Without the FloppyEmu, it seeks the internal floppy, then boots a CoGS card in **slot 5**. So the
     EX/2's expansion slot is slot 5 (the EX's is slot 7).

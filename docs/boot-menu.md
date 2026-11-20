@@ -7,6 +7,8 @@ with 3.0 on S/N 59554 (original Laser 128):**
   switched to the internal drive as predicted. With the FIXUP version: **boots and stays on drive 2.**
 - **Banner:** "3.0X" banner version tested.
 - **Quad Hi-Res:** still works with the new ROM (DHGRTEST2).
+- **ROM 6.0 (128EX):** built (`roms/bootmenu/Laser128_6.0_bootmenu.bin`) and passes the model checks; not yet
+  tried on hardware. Plan and result below.
 - **Not yet tried on hardware:** the 2.7 and 2.9 images, option 7 with a card, and DOS 3.3 from drive 2 (expected
   to switch to drive 1).
 
@@ -104,7 +106,7 @@ Started Nov 2026 (survey of 3.3–6.1). Next: the ROM version in the owner's New
   A boot-menu key (B = `$02`) would be a seventh entry. The table is inline at `$F9FD`, so adding one means
   moving the table or adding a compare in a free gap.
 
-### Plan for ROM 6.0 (128EX), Nov 2026
+### ROM 6.0 (128EX): plan as built, Nov 2026
 - **Key hook:** `$F9BB JSR $FA17` (taken when no table key matched; A = key AND `$1F`) → `JSR KEYB`. KEYB (13 bytes):
   if A = `$02` (B), `STZ $03F3`, `STZ $03F4` to force the cold path, then `JMP $FA17`.
 - **Cold-start hook:** `$F9DA JMP $FEE0` → `JMP BOOTSEL`. `$FEE0` is the autostart scan: slots 7, 6, 5 by
@@ -112,8 +114,10 @@ Started Nov 2026 (survey of 3.3–6.1). Next: the ROM version in the owner's New
   BOOTSEL: if B is still held, select the menu bank and enter; otherwise `JMP $FEE0`.
 - **Menu bank:** chip `$7800` (C6 alone on the EX), free from chip `$791F` (993 bytes, `$C91F–$CCFF`). Stub:
   `LDA $CFFF`, `LDA $C600`, `JMP` into it. The menu copies itself to RAM as on the original board.
-- **Gaps:** `$F1AB`, `$F209`, `$F379` (23 bytes each) and `$F758` (17 bytes). Check them for references first,
-  as was done for the original-board gaps.
+- **Gaps:** `$F1AB`, `$F209`, `$F379` (23 bytes each) and `$F758` (17 bytes), all `$FF`. The reference scan
+  turned up one hit, `STZ $F210,X` at chip `$287F`. It's a false positive: it sits mid-instruction in a
+  `ROL $9E / BPL` sequence. Used: BOOTSEL (20 bytes) at `$F1AB`, the bank-select stub (9) at `$F209`, KEYB (13)
+  at `$F758`. `$F379` is still free.
 - **Choices:**
   - **1** internal 5.25" (slot 6);
   - **2** external 5.25" (RAM copy of the slot 6 boot page with drive 2, plus the ProDOS FIXUP);
@@ -122,5 +126,8 @@ Started Nov 2026 (survey of 3.3–6.1). Next: the ROM version in the owner's New
   - **B** BASIC, **M** monitor.
 
   Show 5 and 7 only when their signatures answer; they start through `JMP $Cn00`, as the autostart does.
-- **Build:** extend `software/bootmenu/build.py` with a 6.0 profile (different hooks and bank select), and check
-  in the model as for 2.7, 2.9 and 3.0.
+- **Layout in the bank:** copier (35 bytes) at `$C91F`, then the body (815 bytes): the drive-2 boot page, which
+  runs at `$1000` (page-aligned without padding), then `menu60.s` at `$1100`. 143 bytes are left spare.
+- **Build:** `patch60()` / `check60()` in `software/bootmenu/build.py`. The 6.0 slot 6 boot page relocates the
+  same way as 2.9/3.0 (`LDA $CFFF`, `ORA $C0EA`, three `JSR $C683`, `JMP $0801`).
+- **Banner:** "LASER 128 ROM  Version 6.0" → "LASER 128 ROM Version 6.0X" (same length).

@@ -50,6 +50,7 @@ class Sim:
             elif op == 0x60: pc = s.rts(); continue
             elif op == 0x4C: pc = w; continue
             elif op == 0x7C: a = (w + s.x) & 0xFFFF; pc = s.main[a] | s.main[a + 1] << 8; continue
+            elif op == 0x6C: pc = s.rd(w) | s.rd((w + 1) & 0xFFFF) << 8; continue
             elif op == 0x1A: s.a = s.nz(s.a + 1); n = 1
             elif op == 0xB2: s.a = s.nz(s.rd(zpi())); n = 2
             elif op == 0xDA: s.push(s.x); n = 1

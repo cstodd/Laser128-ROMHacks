@@ -1,4 +1,4 @@
-# Boot menu for the original Laser 128 (ROM 2.7, 2.9, 3.0)
+# Boot menu for the Laser 128 (ROM 2.7, 2.9, 3.0) and 128EX (ROM 6.0)
 
 **Hold B while powering on, or while pressing Ctrl-Reset, and keep holding it until the menu appears:**
 ```
@@ -23,7 +23,23 @@ Images (27256 / 27C256): `roms/bootmenu/Laser128_2.7_bootmenu.bin`, `…_2.9_…
 `roms/bootmenu/CHECKSUMS.txt`. **Original board only:** the menu lives in a `$C800` bank selected the way the
 original board decodes it (`docs/free-space.md`).
 
-## How it works
+## ROM 6.0 (Laser 128EX)
+`roms/bootmenu/Laser128_6.0_bootmenu.bin`. **For 6.0 only** (the EX decodes the `$C800` banks differently). Same
+use: hold B at power-on or Ctrl-Reset. The menu has the same choices, plus:
+```
+      5  RAM DISK /RAM5 (SLOT 5)     (only if slot 5's firmware answers)
+      7  3.5 INCH DRIVE (SLOT 7)     (only if slot 7's firmware answers)
+```
+The EX's own reset keys (P/0 control panel, M/Return monitor, 1/2/3 speed, space) are unchanged. Banner: "LASER
+128 ROM Version 6.0X".
+- **Hooks:** `$F9BB JSR $FA17` (after the reset-key table search) → KEYB at `$F758`: B clears `$03F3/$03F4` for a
+  cold start. `$F9DA JMP $FEE0` (start of the autostart scan) → BOOTSEL at `$F1AB`: if B is still held, the stub
+  at `$F209` reads `$CFFF`, `$C600` (chip `$7800` on the EX) and jumps to the copier at `$C91F`; otherwise `JMP $FEE0`.
+- **Bank:** chip `$7800` holds 6.0's slot 6 helpers up to `$791E`. The copier and body use the free tail. The body
+  is the drive-2 boot page (run at `$1000`) and `menu60.s` (at `$1100`).
+- **5 and 7** start the way 6.0's autostart does: `$00/$01 = $Cn00`, `JMP ($0000)`, after the same signature test.
+
+## How it works (2.7, 2.9, 3.0)
 - **Banner:** 3.0's trailing space becomes `X`; 2.7 and 2.9 close up `128  ROM` to `128 ROM` to make room.
 - **Reset key check** (`$F9C0`; `$F9C3` in 3.0): the `CMP #$10 / BEQ` for P becomes `JMP $FAF5`. The 20 bytes
   there handle P as before, and for **B** clear `$03F3`/`$03F4` so the reset takes the full cold-start path
@@ -68,7 +84,8 @@ original board decodes it (`docs/free-space.md`).
    - DOS 3.3 is expected to switch to drive 1 after its first stage.
 
 ## Build
-`python3 build.py` patches each ROM by byte pattern, checks that only the two hooks, the two gaps and the menu
+`python3 build.py` builds all four images (6.0 with its own patch and checks, which cover the same ground plus 5
+and 7 with and without their firmware). It patches each original-board ROM by byte pattern, checks that only the two hooks, the two gaps and the menu
 bank changed, and runs the 65C02 model:
 - the reset key logic for P, M, B and other keys;
 - the end-of-cold-start hook with and without B held, including the bank-select reads;

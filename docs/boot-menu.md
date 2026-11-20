@@ -8,7 +8,7 @@ with 3.0 on S/N 59554 (original Laser 128):**
 - **Banner:** "3.0X" banner version tested.
 - **Quad Hi-Res:** still works with the new ROM (DHGRTEST2).
 - **ROM 6.0 (128EX), current image CRC32 `4fb06d29` (waits for the 5/7 key to be released), all tested on the
-  user's EX:**
+  user's EX (S/N 1002869):**
   - 1, 2, B, M and the EX's reset keys work as expected.
   - **7 with a CoGS card** (S7,D1 mounted in the card's menu) boots it, the same as `PR#7`. Tapping C after 7
     opens the CoGS menu.
@@ -25,6 +25,12 @@ with 3.0 on S/N 59554 (original Laser 128):**
 
     So the menu starts the card correctly. The card's own boot code finds nothing it can boot and falls back to
     slot 6. That's a card or compatibility issue, not a menu one.
+- **Original board: 2.7X (`9866b5bc`) and 2.9X (`1d5b5452`) pass the same tests as 3.0X** on hardware.
+  - **A slot 7 card boots by itself** on the original board: with the CoGS in the slot, it boots without the
+    menu. The original ROMs' cold start ends with a slot 7 card test, and BOOTSEL passes through to it when B
+    isn't held.
+  - The original board has no INT/EXT switches. Its external slot is believed to be slot 7 only, so the slot 5
+    option has nothing to reach there.
 - **Original board, current 3.0X (CRC32 `b7842da4`), regression-tested on S/N 59554:**
   - B, P and M at startup work, and B brings up the menu.
   - 1, B and M from the menu work.
@@ -35,8 +41,8 @@ with 3.0 on S/N 59554 (original Laser 128):**
   - **Slot 5 can't be tested:** the original board has no slot 5/7 INT/EXT switches, and no memory card or RAM
     disk is known for it. The option only appears if a slot 5 ROM answers with the boot signature, so it's
     harmless.
-- **Not yet tried on hardware:** the 2.7 and 2.9 images, option 7 with a card, and DOS 3.3 from drive 2 (expected
-  to switch to drive 1).
+- **Not tried on hardware:** slot 5 with a card on either machine, and DOS 3.3 from drive 2 on the original
+  board. On the EX it switched to drive 1 as expected.
 
 **Goal:** choose the boot device at power-up or reset, especially the **external** 5.25" port, so a FloppyEmu or
 second drive can boot without opening the machine.

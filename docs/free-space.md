@@ -212,7 +212,9 @@ bits, and jumps through a table at `$CCxx`. Monitor test: `C0EE C0EC C0E8`, `C0E
 window is:
 - `$C800–$CBFF`: 1K buffer RAM (uninitialised, contents drift at power-up);
 - `$CC00–$CFFF`: one 1K ROM slice chosen by `$C0ED` bits 4–5: `$00` → `$6000`, `$10` → `$6400`, `$20` → `$6800`,
-  `$30` → `$6C00` (bit 6 untested).
+  `$30` → `$6C00`, and **`$40` → `$7000`** (confirmed, Nov 2026, EX S/N 1002869: `4C 40 CD 4C 5D CF 4C 34`). So
+  bits 4–6 together select one of eight 1K slices of chip `$6000–$7FFF`. `$50`–`$70` (expected `$7400`, `$7800`,
+  `$7C00`) haven't been read on hardware. That second 4K is also reachable as the C5+C6 and C6 banks.
 
 Write `$C0ED` like the firmware does: `CMP $C0E8`, `CMP $C0ED`, `STA $C0ED`, keeping bits 0–3 (controller mode) and
 bit 7. That accounts for all of 6.0's ROM:
@@ -224,7 +226,7 @@ bit 7. That accounts for all of 6.0's ROM:
 | `$4800` | C1 |
 | `$5000` | C5 |
 | `$5800` | C2 |
-| `$6000–$6FFF` | **C7 + `$C0ED` page**, 1K at `$CC00` |
+| `$6000–$6FFF` | **C7 + `$C0ED` page**, 1K at `$CC00` (bit 6 also reaches `$7000` up) |
 | `$7000` | C5 + C6 |
 | `$7800` | C6 |
 | `$0800` | C3 |

@@ -216,7 +216,13 @@ window is:
   bits 4–6 together select one of eight 1K slices of chip `$6000–$7FFF`. That second 4K is also reachable as the C5+C6 and C6 banks.
   - **`$50`, `$60`, `$70`: all `FF` at `$CC00` on hardware** (Nov 2026), but port 7 was probably set to **EXT**
     for these reads, which hides the internal firmware. Redo with port 7 on INT.
-  - **`$50` with port 7 on INT: chip `$7400` confirmed** (`4C A2 CE 4C 2D CD 4C 39`), so the conflict is gone. `$60` and `$70` fit: the firmware never
+  - **With port 7 on INT, all confirmed:**
+    - `$50` → chip `$7400` (`4C A2 CE 4C 2D CD 4C 39`);
+    - `$60` → `$7800` (`A9 00 85 3C A9 96 85 2B`);
+    - `$70` → `$7C00`. On the 6.0X EPROM this shows the boot menu's text, `CC C5 D3 CF C6 D4 A0 C2`.
+
+    **`$C0ED` bits 4–6 select one of eight 1K slices of chip `$6000–$7FFF`, linearly.** The firmware uses pages
+    `$00–$50`. `$60` and `$70` fit: the firmware never
     asks for those pages.
   - **`$50` doesn't fit.** The firmware's dispatcher (`$C739`: page = command `LSR` `AND #$70`) is called with
     commands `$A0–$A3`, page `$50`, from five places, in the `$6800`, `$6C00` and `$7000` slices. Chip `$7400`

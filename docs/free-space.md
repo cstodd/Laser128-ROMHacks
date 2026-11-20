@@ -110,3 +110,33 @@ their markers appeared. Later boards must decode differently, since the 4.x ROMs
 `$C800` banks 2,636 bytes, of which chip `$7800` is a **completely empty 2K bank reached with `$CFFF`,
 `$C600`, `$C200`**. That's the home for the boot menu. (The alternate slot pages' free space, 859 bytes, is
 reachable only as slot firmware pages and isn't counted.)
+
+## BANKTEST2 on the owner's 128EX (ROM 6.0), Nov 2026: a different select rule
+6.0 has no empty blocks, so the stock ROM identifies every bank (4C74 = `$4800`, 904F = `$5800`, 137D = `$0800`,
+5CED = `$5000`, 521F = `$7000`, 4A9B = `$7800`; F701 = all `$FF`, nothing selected):
+
+| First page \ then | none | C1 | C2 | C3 | C4 | C5 | C6 | C7 |
+|---|---|---|---|---|---|---|---|---|
+| C1 | `$4800` | `$4800` | `$5800` | `$0800` | `$4800` | `$5000` | `$7800` | `$4800` |
+| C2 | `$5800` | `$5800` | `$5800` | `$0800` | `$5800` | `$5000` | `$7800` | `$5800` |
+| C3 | `$0800` | `$0800` | `$0800` | `$0800` | `$0800` | `$0800` | `$0800` | `$0800` |
+| C4 | none | `$4800` | `$5800` | `$0800` | none | `$5000` | `$7800` | none |
+| C5 | `$5000` | `$5000` | `$5000` | `$0800` | `$5000` | `$5000` | `$7000` | `$5000` |
+| C6 | `$7800` | `$7800` | `$7800` | `$0800` | `$7800` | `$7000` | `$7800` | `$7800` |
+| C7 | none | `$4800` | `$5800` | `$0800` | none | `$5000` | `$7800` | none |
+
+**Rule (128EX, 6.0):** after `$CFFF`, latches held until `$CFFF`:
+- **C1** enables the window (chip `$4800`);
+- **C2** sets chip A12 (`$5800`);
+- **C5** sets A12 and clears A11 (`$5000`);
+- **C6** sets A13 and A12 (**`$7800`**; on the original board C6 alone gives `$6800`);
+- **C5 + C6** give `$7000`;
+- **C3** overrides with `$0800`;
+- **C4** and **C7** select nothing (the window reads `$FF`).
+
+**Chip `$6000` and `$6800` were not reached**, although 6.0 has code in both. Likely candidate: `$C007` (INTCXROM).
+6.0 brackets some `$C800` calls with `STA $C007` / `STA $C006` (e.g. the speed keys: `$C007`, `JSR $CE4F`,
+`$C006`), and BANKTEST2 runs with INTCXROM off. A variant with `$C007` on would show.
+
+For a 6.0 boot menu: the free 993 bytes (chip `$791F` onward) are in the `$7800` bank, reached by C6 alone. That's
+also the slot 6 boot helpers' bank.

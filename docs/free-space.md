@@ -140,3 +140,13 @@ reachable only as slot firmware pages and isn't counted.)
 
 For a 6.0 boot menu: the free 993 bytes (chip `$791F` onward) are in the `$7800` bank, reached by C6 alone. That's
 also the slot 6 boot helpers' bank.
+
+**BANKTEST2X on the 128EX (`$C007` on):** every entry was 137D (chip `$0800`). With INTCXROM on, the whole
+`$C100–$CFFF` range shows the main bank's own code, and slot-page reads don't switch banks. 6.0 uses `$C007` only
+to call main-bank `$C800` code; for example the speed keys call `$CE4F`, which writes `$C074` and times a frame on
+`$C019` to measure CPU speed.
+
+**Likely reason `$6000`/`$6800` were missed:** chip `$6000` holds the 3.5" drive code (it contains
+"Please eject disk from 1st 3.5" drive"), so `$6000`/`$6800` are probably **slot 7's** banks. On this EX, C7 selected
+nothing (all `$FF`, like an empty slot), which fits the **port 7 INT/EXT switch under the ROM door being on EXT**:
+internal slot 7 switched out, in favour of the expansion box. Next: set port 7 to INT and rerun BANKTEST2.

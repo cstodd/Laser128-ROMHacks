@@ -17,10 +17,10 @@ with 3.0 on S/N 59554 (original Laser 128):**
 - **New Laser 128, S/N 151202 (owner-installed ROM 6.0; has port 5/7 switches and an expansion RAM header): the
   6.0X image (`4fb06d29`) passes the same tests as on the EX**, with no separate build. Two differences:
   - **No speed keys:** there's no accelerator.
-  - **The CoGS on 7 EXT boots by itself, without the menu,** as on the original Laser 128. On the EX it didn't
-    (same 6.0 code). Not yet explained. 6.0's cold start always scans from slot 7, so the difference is probably
-    in the hardware or timing. One guess: the EX starts at 3.6 MHz and reaches the card before its network side
-    is ready.
+  - **The CoGS on 7 EXT boots by itself, without the menu,** as on the original Laser 128.
+  - **Not a real difference:** re-checked on the EX with 5 INT and 7 EXT, and the EX behaves the same. The CoGS
+    boots by itself (6.0's cold start scans from slot 7), and the menu shows 5 (`/RAM5`). The earlier EX tests
+    were with no drive mounted on the CoGS and with port 5 on EXT.
 - **Earlier 6.0X, CRC32 `5627f1a7`:**
   - **The menu** comes up with B held at reset (the first build didn't; see the cold-start hook below).
   - **The EX's own reset keys** all still work.

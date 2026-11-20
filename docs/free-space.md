@@ -203,3 +203,7 @@ So bits 4–5 (perhaps 6) should select the 1K slice at `$CC00`: `$00` → chip 
 `$6800`, `$30` → `$6C00`. The dispatcher at `$C739` takes a command byte, pages in the slice named by its upper
 bits, and jumps through a table at `$CCxx`. Monitor test: `C0EE C0EC C0E8`, `C0ED`, `C0ED:10`,
 `CFFF C700 CC00.CC07` (one per line).
+
+**Confirmed on the 128EX (6.0):** after `C0EE C0EC C0E8`, `C0ED`, `C0ED:10`, then `CFFF C700 CC00.CC07` reads
+`AE D4 CB BD FB C8 C9 02`, which is **chip `$6400`**. `$C0ED` bits 4–6 page the 1K ROM slice behind slot 7. (`$20`,
+`$30` and bit 6 still to check.)

@@ -128,6 +128,10 @@ Laser128EX-Expansion card project).
 
     So the EX/2's slot 7 drives a plain (non-intelligent) 3.5" drive on the external port, not SmartPort devices.
     With nothing bootable: "Unable to find a bootable disk".
+  - **Slot 5 SmartPort test** (port 5 INT, FloppyEmu in SmartPort Hard Disk mode, a STATUS call to `$C551` from
+    the monitor): **1 device.** Its DIB reads `F8 00 08 00 07 52 41 4D…`: status `$F8`, `$000800` blocks (1 MB),
+    name of 7 characters starting "RAM". So slot 5's SmartPort firmware serves only the RAM disk. It doesn't
+    see SmartPort devices on the external drive port the way an Apple //c's slot 5 does.
   - **Port 5 EXT:** `/RAM5` goes away. It seeks the internal floppy, then boots the FloppyEmu in 3.5" mode if
     present. Without the FloppyEmu, it seeks the internal floppy, then boots a CoGS card in **slot 5**. So the
     EX/2's expansion slot is slot 5 (the EX's is slot 7).

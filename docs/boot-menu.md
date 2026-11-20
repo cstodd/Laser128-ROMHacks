@@ -41,7 +41,16 @@ with 3.0 on S/N 59554 (original Laser 128):**
   - **Slot 5 can't be tested:** the original board has no slot 5/7 INT/EXT switches, and no memory card or RAM
     disk is known for it. The option only appears if a slot 5 ROM answers with the boot signature, so it's
     harmless.
-- **Not tried on hardware:** slot 5 with a card on either machine, and DOS 3.3 from drive 2 on the original
+- **128EX slot 5 test (S/N 1002869, CoGS on the external connector, no expansion box):**
+  - **5 EXT, 7 INT:** the menu shows only 7, the internal 3.5" firmware. 7 doesn't boot the CoGS. `PR#5` doesn't
+    either.
+  - **5 EXT, 7 EXT:** the same as 7 EXT alone (the CoGS boots as slot 7), just without `/RAM5`.
+
+  So without the box, the external connector only appears as **slot 7**. Setting 5 to EXT just turns off the
+  internal RAM disk firmware, and nothing answers at `$C5xx`. The menu behaves correctly: no signature at
+  `$C501`, so no 5. The owner remembers booting a slot 5 card through the Laser expansion box in the 1980s, so
+  the box presumably decodes slot 5 itself.
+- **Not tried on hardware:** slot 5 with a card through the expansion box, and DOS 3.3 from drive 2 on the original
   board. On the EX it switched to drive 1 as expected.
 
 **Goal:** choose the boot device at power-up or reset, especially the **external** 5.25" port, so a FloppyEmu or

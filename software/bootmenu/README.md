@@ -9,6 +9,7 @@
       2  EXTERNAL DRIVE (DRIVE 2)
       B  APPLESOFT BASIC
       M  MONITOR
+      5  SLOT 5 CARD            (only shown if a card answers in slot 5)
       7  SLOT 7 CARD            (only shown if a card answers in slot 7)
 
    HOLD B DURING RESET FOR THIS MENU
@@ -27,8 +28,8 @@ original board decodes it (`docs/free-space.md`).
 `roms/bootmenu/Laser128_6.0_bootmenu.bin`. **For 6.0 only** (the EX decodes the `$C800` banks differently). Same
 use: hold B at power-on or Ctrl-Reset. The menu has the same choices, plus:
 ```
-      5  RAM DISK /RAM5 (SLOT 5)     (only if slot 5's firmware answers)
-      7  3.5 INCH DRIVE (SLOT 7)     (only if slot 7's firmware answers)
+      5  SLOT 5 (RAM DISK OR CARD)   (only if slot 5's firmware answers)
+      7  SLOT 7 (3.5 INCH OR CARD)   (only if slot 7's firmware answers)
 ```
 The EX's own reset keys (P/0 control panel, M/Return monitor, 1/2/3 speed, space) are unchanged. Banner: "LASER
 128 ROM Version 6.0X".
@@ -36,8 +37,11 @@ The EX's own reset keys (P/0 control panel, M/Return monitor, 1/2/3 speed, space
   cold start. `$F9DA JMP $FEE0` (start of the autostart scan) → BOOTSEL at `$F1AB`: if B is still held, the stub
   at `$F209` reads `$CFFF`, `$C600` (chip `$7800` on the EX) and jumps to the copier at `$C91F`; otherwise `JMP $FEE0`.
 - **Bank:** chip `$7800` holds 6.0's slot 6 helpers up to `$791E`. The copier and body use the free tail. The body
-  is the drive-2 boot page (run at `$1000`) and `menu60.s` (at `$1100`).
+  is the drive-2 boot page (run at `$1000`) and `menu.s` (at `$1100`).
 - **5 and 7** start the way 6.0's autostart does: `$00/$01 = $Cn00`, `JMP ($0000)`, after the same signature test.
+  With a port switch on INT the slot is the built-in RAM disk / 3.5" firmware; on EXT it's whatever card is
+  there. A card such as a hard-disk controller appears and boots if its ROM has the standard boot signature
+  (`$Cn01=$20`, `$Cn03=$00`, `$Cn05=$03`). The menu can't read the switches, hence the generic labels.
 
 ## How it works (2.7, 2.9, 3.0)
 - **Banner:** 3.0's trailing space becomes `X`; 2.7 and 2.9 close up `128  ROM` to `128 ROM` to make room.
@@ -52,7 +56,9 @@ The EX's own reset keys (P/0 control panel, M/Return monitor, 1/2/3 speed, space
   runs it from RAM. The menu writes to the text screen and reads the keyboard directly, so nothing depends on
   which `$C800` bank is selected.
 - **Choices:** 1 → `JMP $C600`. B and M call INIT, SETVID and SETKBD, then `$E000` (Applesoft) / `$FF69`
-  (monitor). 7 → the ROM's own slot 7 start (`$00/$01 = $C700`, `JMP $C700`).
+  (monitor). 5 and 7 → shown only when the slot's ROM has the boot signature (`$Cn01=$20`, `$Cn03=$00`,
+  `$Cn05=$03`), started like the ROM's own slot 7 start (`$00/$01 = $Cn00`, `JMP ($0000)`). Slot 5 is for a card
+  on the expansion connector (e.g. a hard-disk controller); the original ROMs' own startup only checks slot 7.
 - **External drive (all versions):** the menu runs a RAM copy of the ROM's own slot 6 boot page at `$1200`
   (page-aligned, so branch timing matches the ROM) with:
   - `$C0EA → $C0EB` (drive 2);
@@ -76,7 +82,7 @@ The EX's own reset keys (P/0 control panel, M/Return monitor, 1/2/3 speed, space
 1. Normal power-on and Ctrl-Reset without B: unchanged behaviour (boots / BASIC prompt).
 2. P and M at reset still work.
 3. B at power-on and B at Ctrl-Reset: menu appears.
-4. 1, B, M, and 7 with/without a slot 7 card.
+4. 1, B, M, and 5 / 7 with and without a card (e.g. a hard-disk controller).
 5. **2 with different disks**:
    - **ProDOS** (8 1.x or 2.x) should now boot and stay on drive 2: check that `PREFIX` and `CAT` show the
      external disk.

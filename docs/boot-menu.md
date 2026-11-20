@@ -125,9 +125,13 @@ Started Nov 2026 (survey of 3.3–6.1). Next: the ROM version in the owner's New
   - **7** 3.5" (slot 7);
   - **B** BASIC, **M** monitor.
 
-  Show 5 and 7 only when their signatures answer; they start through `JMP $Cn00`, as the autostart does.
+  Show 5 and 7 only when their signatures answer; they start through `JMP $Cn00`, as the autostart does. The
+  labels are generic ("SLOT 5 (RAM DISK OR CARD)", "SLOT 7 (3.5 INCH OR CARD)"): with a port switch on EXT, a
+  card there, such as a SASI/SCSI hard-disk controller, shows up and boots if its ROM has the signature.
+- **Original board too (Nov 2026):** the 2.7/2.9/3.0 menus now offer 5 as well as 7, using the same test, for a
+  card on the slot 5 expansion connector. All versions share one `menu.s`; the build fills in the labels.
 - **Layout in the bank:** copier (35 bytes) at `$C91F`, then the body (815 bytes): the drive-2 boot page, which
-  runs at `$1000` (page-aligned without padding), then `menu60.s` at `$1100`. 143 bytes are left spare.
+  runs at `$1000` (page-aligned without padding), then `menu.s` at `$1100`. 139 bytes are left spare.
 - **Build:** `patch60()` / `check60()` in `software/bootmenu/build.py`. The 6.0 slot 6 boot page relocates the
   same way as 2.9/3.0 (`LDA $CFFF`, `ORA $C0EA`, three `JSR $C683`, `JMP $0801`).
 - **Banner:** "LASER 128 ROM  Version 6.0" → "LASER 128 ROM Version 6.0X" (same length).

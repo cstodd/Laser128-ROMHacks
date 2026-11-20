@@ -59,8 +59,12 @@ def extboot(rom, base, fixup, pad=0):
         src += '        .byte ' + ','.join('$%02X' % b for b in page[k:k + 16]) + '\n'
     return src, notes
 
+def menu_src(version, s5, s7):
+    return (open(os.path.join(HERE, 'menu.s')).read()
+            .replace('{VERSION}', version).replace('{S5}', s5).replace('{S7}', s7))
+
 def build_body(ver, rom):
-    tmpl = open(os.path.join(HERE, 'menu.s')).read().replace('{VERSION}', ver + 'X')
+    tmpl = menu_src(ver + 'X', '5  SLOT 5 CARD', '7  SLOT 7 CARD')
     src, _ = extboot(rom, 0x1E00, 0x1000)                     # pass 1: sizes only
     _, sym = asm65.assemble(tmpl.replace('{EXTBOOT}', src), BODY)
     pad = (-sym['BOOT2']) & 0xFF; base = sym['BOOT2'] + pad    # pass 2: page-aligned copy, real FIXUP
@@ -119,7 +123,7 @@ class Machine(Sim):
         for a in (0xFB2F, 0xFE93, 0xFE89): s.main[a] = 0x60   # INIT, SETVID, SETKBD stubs
     def rd(s, a):
         if a == 0xC010: s.io.append(('R', a)); s.kbd &= 0x7F; return 0x80 if s.held else 0
-        if a in (0xCFFF, 0xC600, 0xC200, 0xC701, 0xC703, 0xC705): s.io.append(('R', a))
+        if a in (0xCFFF, 0xC600, 0xC200, 0xC501, 0xC503, 0xC505, 0xC701, 0xC703, 0xC705): s.io.append(('R', a))
         return super().rd(a)
 
 def check(ver, rom, orig, info):
@@ -143,23 +147,28 @@ def check(ver, rom, orig, info):
     m = Machine(rom, held=False); m.main[0xC701] = 0x55
     assert m.run(start=info['s7'], stop={info['s7'] + 3}) == info['s7'] + 3 and m.a == 0x55
     # 3. menu: copier, screen, each choice
-    def menu(keys, card=False, stop=()):
+    def menu(keys, slots=(), stop=()):
         m = Machine(rom, keys=[ord(c) for c in keys])
-        if card: m.main[0xC701], m.main[0xC703], m.main[0xC705] = 0x20, 0x00, 0x03
+        for n in slots: m.main[0xC001 + n * 0x100], m.main[0xC003 + n * 0x100], m.main[0xC005 + n * 0x100] = 0x20, 0x00, 0x03
         pc = m.run(start=0xC800, stop=set(stop), limit=2_000_000); return m, pc
     m, pc = menu('1', stop={0xC600})
     assert pc == 0xC600
     scr = lambda m, y: bytes(c & 0x7F for c in m.main[0x400 + (y & 7) * 0x80 + (y >> 3) * 0x28:][:40]).decode()
-    # screen was cleared at the end (CLS before booting), so check the menu text on a run that waits:
-    w = Machine(rom, keys=[]); w.run(start=0xC800, stop={0x1000 + 0}, limit=200000)
-    try: w.run(start=0x1000, limit=300000)
-    except RuntimeError as e: assert 'did not finish' in str(e)
-    assert 'LASER 128 BOOT MENU' in scr(w, 3) and ver in scr(w, 4) and '2  EXTERNAL DRIVE' in scr(w, 9), scr(w, 3)
-    assert '7  SLOT 7' not in scr(w, 15) and 'M  MONITOR' in scr(w, 13)
+    # screen was cleared at the end (CLS before booting), so check the menu text on runs that wait:
+    for slots in ((), (5,), (7,), (5, 7)):
+        w = Machine(rom, keys=[])
+        for n in slots: w.main[0xC001 + n * 0x100], w.main[0xC003 + n * 0x100], w.main[0xC005 + n * 0x100] = 0x20, 0x00, 0x03
+        try: w.run(start=0xC800, limit=500000)
+        except RuntimeError as e: assert 'did not finish' in str(e)
+        assert 'LASER 128 BOOT MENU' in scr(w, 3) and ver in scr(w, 4) and '2  EXTERNAL DRIVE' in scr(w, 9), scr(w, 3)
+        assert 'M  MONITOR' in scr(w, 13)
+        assert ('5  SLOT 5 CARD' in scr(w, 15)) == (5 in slots) and ('7  SLOT 7 CARD' in scr(w, 17)) == (7 in slots)
     m, pc = menu('b', stop={0xE000}); assert pc == 0xE000
     m, pc = menu('M', stop={0xFF69}); assert pc == 0xFF69
-    m, pc = menu('7b', card=False, stop={0xC700, 0xE000}); assert pc == 0xE000, 'no card: 7 ignored'
-    m, pc = menu('7', card=True, stop={0xC700}); assert pc == 0xC700 and m.main[0] == 0 and m.main[1] == 0xC7
+    m, pc = menu('57b', stop={0xC500, 0xC700, 0xE000}); assert pc == 0xE000, 'no card: 5/7 ignored'
+    for n in (5, 7):
+        m, pc = menu(str(n), slots=(5, 7), stop={0xC500, 0xC700})
+        assert pc == 0xC000 + n * 0x100 and m.main[0] == 0 and m.main[1] == 0xC0 + n and m.io[-1][1] == 0xCFFF
     b2, fx = info['sym']['BOOT2'], info['sym']['FIXUP']
     m, pc = menu('2', stop={b2}); assert pc == b2
     assert [e[1] for e in m.io if e[1] in (0xCFFF, 0xC600)][-2:] == [0xCFFF, 0xC600]
@@ -179,14 +188,14 @@ def check(ver, rom, orig, info):
 #   $F9BB JSR $FA17   (end of the power-up key table search: A = key AND $1F) -> JSR KEYB (B forces a cold start)
 #   $F9DA JMP $FEE0   (cold start -> autostart scan of slots 7, 6, 5)       -> JMP BOOTSEL
 #   chip $791F-$7CFF  free tail of the $C800 bank selected by $CFFF, $C600 (chip $7800, the slot 6 helper bank):
-#                     copier at $C91F, then the body: the drive-2 boot page (runs at $1000) and menu60.s ($1100).
+#                     copier at $C91F, then the body: the drive-2 boot page (runs at $1000) and menu.s ($1100).
 V60 = dict(file='Laser128_6.0.bin', key=0xF9BB, cold=0xF9DA,
            keyb=0xF758, sel=0xF1AB, stub=0xF209, free=(0x791F, 0x7D00))
 COPY60 = 0xC800 + 0x791F - BANK
 def gap_free(rom, addr, n): o = addr - 0xC000; return all(b == 0xFF for b in rom[o:o + n])
 
 def build_body60(rom):
-    tmpl = open(os.path.join(HERE, 'menu60.s')).read().replace('{VERSION}', '6.0X')
+    tmpl = menu_src('6.0X', '5  SLOT 5 (RAM DISK OR CARD)', '7  SLOT 7 (3.5 INCH OR CARD)')
     ext = 'EXTBOOT: LDA $CFFF      ; clear the bank latches\n        LDA $C600       ; slot 6 helper bank\n        JMP $1000\n'
     code, sym = asm65.assemble(tmpl.replace('{EXTBOOT}', ext), 0x1100)
     page, notes = boot_copy(rom, 0x1000, sym['FIXUP'])
@@ -275,7 +284,8 @@ def check60(rom, orig, info):
         try: w.run(start=COPY60, limit=400000)
         except RuntimeError as e: assert 'did not finish' in str(e)
         assert 'LASER 128 BOOT MENU' in scr(w, 3) and '6.0X' in scr(w, 4) and '2  EXTERNAL DRIVE' in scr(w, 9), scr(w, 4)
-        assert ('RAM DISK' in scr(w, 15)) == (5 in slots) and ('3.5 INCH' in scr(w, 17)) == (7 in slots)
+        assert ('5  SLOT 5 (RAM DISK OR CARD)' in scr(w, 15)) == (5 in slots)
+        assert ('7  SLOT 7 (3.5 INCH OR CARD)' in scr(w, 17)) == (7 in slots)
     assert bytes(w.main[0x1000:0x1000 + info['body']]) == info['body_bytes'], 'copier'
     m, pc = menu('1', stop={0xC600}); assert pc == 0xC600 and m.io[-1][1] == 0xCFFF
     m, pc = menu('b', stop={0xE000}); assert pc == 0xE000

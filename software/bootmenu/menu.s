@@ -1,9 +1,10 @@
-; BOOT MENU body. Assembled at $1000 for each ROM version; the build fills in {VERSION} and the
-; external-drive routine (EXTBOOT). Lives in ROM chip $7800 ($C800 bank selected by $CFFF, $C600, $C200),
-; copied to $1000 by copier.s, and runs from RAM, so it never depends on which $C800 bank is selected.
+; BOOT MENU body, shared by all ROM versions. The build fills in {VERSION}, the slot 5/7 labels {S5}/{S7} and
+; the external-drive routine (EXTBOOT). Copied from a $C800 bank to RAM and run there, so it never depends on
+; which $C800 bank is selected. 5 and 7 are offered only when the slot's ROM has the autostart boot signature
+; (any card or built-in firmware: RAM disk, 3.5" drive, hard-disk controller...).
 ; Writes straight to text page 1 and reads the keyboard directly: no firmware I/O until a choice is made.
 BASL    = $06
-TMP     = $08
+TMP     = $08           ; 2 bytes
 INIT    = $FB2F
 SETVID  = $FE93
 SETKBD  = $FE89
@@ -23,7 +24,13 @@ PL:     LDA LINES,X     ; row, column, string offset; row $FF ends
         INX
         INX
         BRA PL
-PDONE:  JSR HAS7        ; offer slot 7 only when a card answers there
+PDONE:  LDA #$C5         ; offer 5 and 7 only when their firmware answers
+        JSR HASSLOT
+        BCC PD7
+        LDX #L5-LINES
+        JSR PRINT
+PD7:    LDA #$C7
+        JSR HASSLOT
         BCC WREL
         LDX #L7-LINES
         JSR PRINT
@@ -36,6 +43,8 @@ KEY:    LDA $C000
         BEQ INT
         CMP #$B2        ; 2
         BEQ EXT
+        CMP #$B5        ; 5
+        BEQ SL5
         CMP #$B7        ; 7
         BEQ SL7
         AND #$DF
@@ -45,16 +54,24 @@ KEY:    LDA $C000
         BEQ MON
         BRA KEY
 INT:    JSR CLS
+        LDA $CFFF
         JMP $C600       ; internal drive: the normal slot 6 boot
 EXT:    JSR CLS
         JMP EXTBOOT
-SL7:    JSR HAS7
+SL5:    LDA #$C5
+        BRA SLN
+SL7:    LDA #$C7
+SLN:    PHA
+        JSR HASSLOT
+        PLA
         BCC KEY
+        PHA
         JSR CLS
-        STZ $00         ; as the ROM's own cold start does for a slot 7 card
-        LDA #$C7
+        PLA
+        STZ $00         ; as the autostart does: $00/$01 = $Cn00, JMP ($0000)
         STA $01
-        JMP $C700
+        LDA $CFFF
+        JMP ($0000)
 BAS:    JSR SETUP
         JMP $E000       ; Applesoft cold start
 MON:    JSR SETUP
@@ -65,17 +82,23 @@ SETUP:  JSR CLS
         JSR SETVID
         JMP SETKBD
 
-HAS7:   LDA $C701       ; the ROM's own slot 7 test: $Cn01=$20, $Cn03=$00, $Cn05=$03
+; HASSLOT: A = $C5 or $C7. Carry set if the autostart signature is there ($Cn01=$20, $Cn03=$00, $Cn05=$03)
+HASSLOT: STA TMP+1
+        STZ TMP
+        LDY #1
+        LDA (TMP),Y
         CMP #$20
-        BNE NO7
-        LDA $C703
-        BNE NO7
-        LDA $C705
+        BNE NOS
+        LDY #3
+        LDA (TMP),Y
+        BNE NOS
+        LDY #5
+        LDA (TMP),Y
         CMP #$03
-        BNE NO7
+        BNE NOS
         SEC
         RTS
-NO7:    CLC
+NOS:    CLC
         RTS
 
 CLS:    LDA #$04        ; text page 1 = spaces
@@ -132,7 +155,8 @@ LINES:  .byte 3,8,S0-STRS
         .byte 13,6,S5-STRS
         .byte 20,3,S6-STRS
         .byte $FF
-L7:     .byte 15,6,S7-STRS
+L5:     .byte 15,6,S5R-STRS
+L7:     .byte 17,6,S7-STRS
 
 STRS:
 S0:     .aschi "LASER 128 BOOT MENU"
@@ -143,7 +167,9 @@ S2:     .aschi "1  INTERNAL DRIVE"
         .byte 0
 S3:     .aschi "2  EXTERNAL DRIVE (DRIVE 2)"
         .byte 0
-S7:     .aschi "7  SLOT 7 CARD"
+S7:     .aschi "{S7}"
+        .byte 0
+S5R:    .aschi "{S5}"
         .byte 0
 S4:     .aschi "B  APPLESOFT BASIC"
         .byte 0

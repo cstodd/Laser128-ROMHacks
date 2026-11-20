@@ -94,5 +94,12 @@ Started Nov 2026 (survey of 3.3–6.1). Next: the ROM version in the owner's New
   993 bytes (6.x), at chip `$7800`. The current menu is 768 bytes including the 256-byte drive-2 boot copy.
 - First step: run BANKTEST2 on a New 128 / EX. The 4.x ROMs run code from chip `$5000`, `$6000` and `$7000`,
   which the original board can't reach, so these boards decode the `$C800` banks differently.
-- Also: where the 4.x/6.x reset key check, cold-start end and free gaps sit; the key table there already has
-  P, M, Q, R, S, @.
+- **6.0 reset keys** (table at `$F9FD`, after `AND #$1F`, jump table at `$FAF5`):
+  - **P/0** → `$C1D9` (control panel);
+  - **M/Return** → `$F8A4` (monitor);
+  - **1/Q, 2/R, 3/S** → the speed keys: speed codes `$56`, `$96` and `$D6`, set through `$CE4F` in a `$C800`
+    bank, then the normal reset continues. The likely order is 1 MHz, 2.3 MHz and 3.6 MHz (not yet traced);
+  - **Space/@** → the same code as 2.
+
+  A boot-menu key (B = `$02`) would be a seventh entry. The table is inline at `$F9FD`, so adding one means
+  moving the table or adding a compare in a free gap.

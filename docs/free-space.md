@@ -214,7 +214,8 @@ window is:
 - `$CC00–$CFFF`: one 1K ROM slice chosen by `$C0ED` bits 4–5: `$00` → `$6000`, `$10` → `$6400`, `$20` → `$6800`,
   `$30` → `$6C00`, and **`$40` → `$7000`** (confirmed, Nov 2026, EX S/N 1002869: `4C 40 CD 4C 5D CF 4C 34`). So
   bits 4–6 together select one of eight 1K slices of chip `$6000–$7FFF`. That second 4K is also reachable as the C5+C6 and C6 banks.
-  - **`$50`, `$60`, `$70`: all `FF` at `$CC00` on hardware** (Nov 2026). `$60` and `$70` fit: the firmware never
+  - **`$50`, `$60`, `$70`: all `FF` at `$CC00` on hardware** (Nov 2026), but port 7 was probably set to **EXT**
+    for these reads, which hides the internal firmware. Redo with port 7 on INT. `$60` and `$70` fit: the firmware never
     asks for those pages.
   - **`$50` doesn't fit.** The firmware's dispatcher (`$C739`: page = command `LSR` `AND #$70`) is called with
     commands `$A0–$A3`, page `$50`, from five places, in the `$6800`, `$6C00` and `$7000` slices. Chip `$7400`

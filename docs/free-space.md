@@ -67,8 +67,8 @@ are unreachable** on this board.
 | `$7800` | C6, or C7 + pages `$60`/`$70` |
 
 The New Laser 128 (S/N 151202) runs 6.0 and the 6.0X boot menu without change, so it decodes the same way
-(BANKTEST2 not run on it). The EX/2 (6.1) is assumed to decode the same way: its `$7800` bank is laid out like
-6.0's. Not yet measured.
+(BANKTEST2 not run on it). The EX/2 (6.1) runs the 6.1X boot menu, which relies on the same C6 → `$7800` selection, so it decodes the same
+way for that bank. BANKTEST2 not run on it.
 
 ## 3. Free space
 Runs of at least 16 `$FF` bytes, in usable bytes:

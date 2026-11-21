@@ -61,7 +61,7 @@ The key routine and banner routine addresses differ (4.1: `$FA07`, `$CE35`; 4.2:
 ## ROM 6.1 (Laser 128EX/2)
 `roms/bootmenu/Laser128_6.1_bootmenu.bin`. Same patch, hooks at `$F9C1` and `$F9D1`. The menu path also runs 6.1's
 3.5" controller init (`$C71A`), as its cold start does before choosing a boot slot. Banner: "LASER 128EX/2 ROM
-Version 6.1X". Not yet tested on hardware.
+Version 6.1X". Tested on the owner's EX/2: everything works as expected.
 
 ## How it works (2.7, 2.9, 3.0)
 - **Banner:** 3.0's trailing space becomes `X`; 2.7 and 2.9 close up `128  ROM` to `128 ROM` to make room.

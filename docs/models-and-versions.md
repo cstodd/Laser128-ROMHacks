@@ -116,6 +116,9 @@ Laser128EX-Expansion card project).
   - It has **only a port 5 INT/EXT switch**, no port 7 switch.
   - With the control panel's Boot Slot set to 7, it doesn't boot the FloppyEmu. The FloppyEmu can emulate a
     3.5" drive or a SmartPort device as well as a 5.25" drive, so which mode and port it's in matters.
+  - **6.1X boot menu: tested, everything works as expected** (Nov 2026).
+    - **Slot 5:** `/RAM5` (port 5 INT) and the expansion card (EXT) are mutually exclusive.
+    - **Slot 7:** always the internal 3.5" firmware (no port 7 switch), driving a 3.5" drive on the drive port.
   - **Reset keys (6.1):** the same six as 6.0 (table at `$FDAC`, handlers via `$FAF5`):
     - P/0 → control panel (`$C1D9`);
     - M/Return → monitor (`$F8A2`);

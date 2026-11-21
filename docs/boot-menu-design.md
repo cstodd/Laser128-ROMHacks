@@ -16,7 +16,7 @@ usage details are in `software/bootmenu/README.md`.
 | 3.0 | original Laser 128 | `Laser128_3.0_bootmenu.bin` | `b7842da4` | **tested**, S/N 59554 |
 | 4.1, 4.2, 4.3, 4.5 | New Laser 128 / early 128EX | `Laser128_4.x_bootmenu.bin` | see `CHECKSUMS.txt` | model only |
 | 6.0 | 128EX, New Laser 128 | `Laser128_6.0_bootmenu.bin` | `4fb06d29` | **tested**, 128EX S/N 1002869 and New Laser 128 S/N 151202 |
-| 6.1 | 128EX/2 | `Laser128_6.1_bootmenu.bin` | `2ebc06db` | model only |
+| 6.1 | 128EX/2 | `Laser128_6.1_bootmenu.bin` | `2ebc06db` | **tested**, owner's EX/2 |
 
 Not covered: VTech's 1986 ROMs (860801, 860915) and 3.3/3.5. The cold-start banner gains an **X** ("…Version
 3.0X") to mark the modified firmware.
@@ -149,3 +149,8 @@ Hardware testing then covers what the model can't.
   - 128EX without the expansion box: slot 7 (port 7 on EXT);
   - 128EX through the expansion box: slot 5 as well (port 5 on EXT);
   - EX/2: slot 5.
+- **EX/2 slots:**
+  - **Slot 5:** port 5 INT gives `/RAM5`, EXT gives the expansion card, so the menu never offers both in one
+    session.
+  - **Slot 7:** there's no port 7 switch, so slot 7 is always the internal 3.5" firmware. It drives a 3.5"
+    drive on the drive port.

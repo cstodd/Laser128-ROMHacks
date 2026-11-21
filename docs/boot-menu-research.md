@@ -6,7 +6,7 @@ means the owner's machines:
 - original Laser 128 **S/N 59554** (ROM 2.7, also run with 2.9 and 3.0);
 - 128EX **S/N 1002869** (6.0);
 - New Laser 128 **S/N 151202** (6.0, owner-installed);
-- 128EX/2 (6.1).
+- 128EX/2 (6.1; S/N not recorded).
 
 ## Findings
 ### 1. The stock firmware boots slot 6 drive 1 only, and the drive is fixed in the boot code
@@ -79,7 +79,8 @@ means the owner's machines:
 - **Finding:** after the banner, 6.1 runs `BIT $CFFF`, `BIT $C700`, `STZ $CABC`, `$C71A` (X=3, Y=`$14`), then
   picks the boot slot from the control panel setting. The menu path does the same init (INIT7) before entering
   the menu, so option 7 starts from the stock state.
-- **How we know:** disassembly of 6.1's `$F9D1–$F9F8` and `$C71A`. Not yet confirmed on hardware.
+- **How we know:** disassembly of 6.1's `$F9D1–$F9F8` and `$C71A`. Confirmed on hardware: 6.1X works on the
+  EX/2, including 7.
 
 ### 8. Cards can see a held key, so the menu waits for 5/7 to be released
 - **Finding:** some cards poll the keyboard as they start. A CoGS card takes C/M as "open my menu" and a digit
@@ -123,9 +124,9 @@ with nothing mounted.
 | **6.0X `4fb06d29`** | 128EX S/N 1002869 | all choices: 1, 2, 5 (`/RAM5`, and a card via the box), 7 (CoGS), B, M; reset keys; DOS 3.3 → drive 1 |
 | **6.0X `4fb06d29`** | New Laser 128 S/N 151202 | same as the 128EX (no speed keys: no accelerator) |
 | **3.0X `b7842da4`, 2.9X `1d5b5452`, 2.7X `9866b5bc`** | S/N 59554 | B/P/M at reset; 1, 2 (ProDOS stays on drive 2), 7 (CoGS, and tap C for its menu), B, M; stacked mode; DOS 3.3 → drive 1 |
-| 4.1X–4.5X, 6.1X | — | not yet tested |
+| **6.1X `2ebc06db`** | owner's EX/2 | everything as expected: menu with B, reset keys, 1, 2, 5 (`/RAM5` on INT, or the card on EXT, never both), 7 (3.5" drive on the drive port), B, M |
+| 4.1X–4.5X | — | not yet tested |
 
 ## Open items
-- **6.1X on the EX/2:** the full test list, including 7 with the FloppyEmu in 3.5" mode and 2 in 5.25" mode.
 - **4.5X (or 4.2X) on the EX or New 128,** with the FloppyEmu in SmartPort Hard Disk and UniDisk 3.5 modes, via
   option 7. This tests the 4.x image and the reported 4.x SmartPort support at the same time.

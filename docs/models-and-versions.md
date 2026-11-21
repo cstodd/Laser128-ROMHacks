@@ -197,8 +197,7 @@ Worth probing:
    switch; what drives it on a Laser is unknown. Probe: `PEEK(49248)` on each machine.
 3. **`$C074` (speed):** the documented values are `$00`, `$80`, `$C0`. The slot 5 firmware forces `$C0` around
    RAM-disk access and restores the saved setting. Other bits are untested.
-4. **Where the EX/2 keeps its settings with the power off.** The only non-volatile hardware the ROM talks to is
-   the clock at `$C078`: index/data, with register `$0D` used as HOLD/BUSY. That's MSM6242-style, a 4-bit RTC
-   with no general RAM. How the Boot Slot and speed settings survive power-off is still to be traced. It might
-   show bytes that programs could use.
+4. **Where the EX/2 keeps its settings: answered.** They're 24 bytes plus a checksum at `$C8B8–$C8D0` in slot 7's
+   3.5" controller buffer RAM, which must be battery-backed on the EX/2. The `$C078` clock is a 4-bit
+   MSM6242-style RTC holding only the time. See `ex2-settings-and-clock.md`.
 5. **The UDC 3.5" controller registers** (`$C0E8–$C0EF`: `$C0EC`, `$C0ED` bit 7). See BMOW's article.

@@ -42,7 +42,7 @@ Machines: original Laser 128 **S/N 59554** (ROM 2.7) and 128EX **S/N 1002869** (
 - **How we know:** BANKTEST2X on the 128EX: every entry 137D (chip `$0800`), with port 7 on INT and on EXT.
 
 ### 5. Slot 7's window (port 7 INT) is 1K of buffer RAM plus a 1K ROM slice paged by `$C0ED` bits 4–6
-- **Finding:** `$C800–$CBFF` is RAM. `$CC00–$CFFF` shows chip `$6000 + page × $40` (×256 bytes), where
+- **Finding:** `$C800–$CBFF` is RAM. `$CC00–$CFFF` shows chip `$6000 + page × $400`, where
   `page = ($C0ED >> 4) AND 7`. All eight values from `$00` to `$70` were confirmed, linear.
 - **How we know:**
   1. **BANKTEST2 with port 7 on INT:** C7 gave sums that match no ROM block. Monitor dumps of `$C800` showed

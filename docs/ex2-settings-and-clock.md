@@ -41,10 +41,24 @@ Traced from ROM 6.1 (Nov 2026). Hardware checks are listed at the end.
 
   Working copies of the time are kept at `$C8B0–$C8B7` in the same buffer RAM.
 
+### 3. ProDOS gets the clock with no driver file: the firmware installs itself
+- **What:** slot 7's firmware patches ProDOS's date/time vector the first time it handles a ProDOS call.
+  - **The patch** (slice `$6800`, `$CC27`): if `$BF00` is a `JMP` (ProDOS is present) and `$BF06` isn't already
+    one, it writes **`JMP $C718`** at `$BF06`. Normally `$BF06` is an `RTS`, meaning no clock.
+  - **Reading the time:** `$C718` enters the slot 7 firmware with carry clear (`CLC` / `BCS`, falling into
+    `$C71B`). That leads to `$CE64` and dispatches command `$2C`, which runs `$CC0C` in the `$C0ED` page `$10`
+    slice. That routine reads the clock and fills ProDOS's `$BF90–$BF93`.
+  - **The same entry at reset:** `$C71A` is the same code with carry set. The `$38` at `$C71A` is the `BCS`
+    operand, read as `SEC`.
+- **So stock ProDOS time-stamps files on the EX/2,** with no CLOCK.SYSTEM or other driver file. ProDOS normally
+  calls slot 7's firmware at startup (to count its devices), so the hook is in place from boot. If a clock
+  driver has already installed itself (`$BF06` is a `JMP`), the firmware leaves it alone.
+- **6.0 has neither part:** no `$C078` access and no `$BF06` patch. That fits the 128EX having no clock.
+
 ## What this means for a modern clock card
 A replacement has to reproduce two things:
 1. **The `$C078` register interface:** an MSM6242-compatible register set, 4-bit, with HOLD/BUSY in `$0D`. The
-   6.1 driver and ProDOS time-stamping then work unchanged. A modern RTC (an RV-3028, DS3231, …) can sit behind
+   6.1 firmware and its driverless ProDOS time-stamping then work unchanged. A modern RTC (an RV-3028, DS3231, …) can sit behind
    a small CPLD or microcontroller that emulates the 6242 registers.
 2. **Battery backup for the settings RAM,** if the original card supplies it. Which part does is still to be
    checked: the 1K buffer RAM chip may be on the motherboard and fed from the card's battery through the

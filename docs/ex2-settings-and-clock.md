@@ -62,12 +62,15 @@ A VTech daughter card with a 2×10 header. What's readable on top:
 - **Logic:** KS74HCTLS10N (74HCT10), two KS74HCTLS74AN (74HCT74), and a CD74HCT04E. The two '74s give four
   flip-flops, enough to latch the 4-bit register number. That fits the ROM's `$C078` sequence: a read (`CMP`)
   resets the sequence, the first write is the register number, the second is the data.
-- **A fifth, larger chip** at the lower left whose label can't be read in this photo.
+- **A fifth chip** at the lower left, label worn, read by the owner as **HD74LS27P** (Hitachi 74LS27, triple
+  3-input NOR). Logic, not RAM, probably part of decoding the select.
 - **Q1–Q3, D1–D4 and electrolytics:** typical of a battery switchover circuit.
 - **The battery:** the original soldered cell, replaced by a CR2032 holder on wires.
 
-**Open:** whether the card holds the settings RAM (the unreadable chip?), or only powers the motherboard's
-slot 7 buffer RAM from its battery through the header. Needed:
+**So the card has no RAM.** The battery-backed settings RAM must be on the motherboard: the slot 7 buffer RAM
+next to the 3.5" controller. Most likely the card's battery reaches it through the header, via the switchover
+circuit. A replacement card would have to provide that battery rail, and any power-fail gating the original
+supplies, as well as the clock. Still needed, to map the header:
 - close-ups of every chip label;
 - the card's underside;
 - the header's traces;

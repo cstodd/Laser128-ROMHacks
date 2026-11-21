@@ -1,5 +1,7 @@
 # Boot menu for the Laser 128 (ROM 2.7, 2.9, 3.0), New Laser 128 (4.1–4.5, 6.0) and 128EX (6.0)
 
+Design: `docs/boot-menu-design.md`. Findings and test record: `docs/boot-menu-research.md`.
+
 **Hold B while powering on, or while pressing Ctrl-Reset, and keep holding it until the menu appears:**
 ```
         LASER 128 BOOT MENU

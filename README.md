@@ -6,7 +6,8 @@ Firmware modifications for the VTech Laser 128 family, in the spirit of the Appl
 |---|---|
 | `docs/free-space.md` | Where there is room in each ROM version, and how the 32K chip maps into memory |
 | `docs/models-and-versions.md` | ROM version boundaries and which Laser 128 model each likely belongs to |
-| `docs/boot-menu.md` | Boot menu design, including booting the external drive |
+| `docs/boot-menu-design.md` | Boot menu design: what it does, per-ROM implementation, status |
+| `docs/boot-menu-research.md` | Boot menu research notes: findings and how each was established, test record |
 | `docs/freespace-detail.txt` | Per-block free-space lists for every ROM |
 | `docs/ref/` | VTech *Laser 128, 128EX, 128EX/2 User's Guide & BASIC Manual* (1989, OCR'd scan) |
 | `roms/` | System ROM dumps (VTech 860801 / 860915, Central Point 2.7 – 6.0, EX/2 6.1), with `SHA256SUMS` |

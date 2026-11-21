@@ -4,7 +4,8 @@ Firmware modifications for the VTech Laser 128 family, in the spirit of the Appl
 
 | Path | What |
 |---|---|
-| `docs/free-space.md` | Where there is room in each ROM version, and how the 32K chip maps into memory |
+| `docs/free-space.md` | ROM layout, `$C800` bank selection on each board, and free space in every version |
+| `docs/free-space-research.md` | Evidence for the layout and bank rules: BANKTEST results, `$C0ED` paging, dead ends |
 | `docs/models-and-versions.md` | ROM version boundaries and which Laser 128 model each likely belongs to |
 | `docs/boot-menu-design.md` | Boot menu design: what it does, per-ROM implementation, status |
 | `docs/boot-menu-research.md` | Boot menu research notes: findings and how each was established, test record |

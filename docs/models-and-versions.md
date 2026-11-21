@@ -47,7 +47,7 @@ Source: `docs/ref/Laser 128 128EX 128EX2 User's Guide & BASIC Manual (1989).pdf`
   `docs/ref/Laser 128EX2 Inside Story ad (1988).jpg`) says: "64K Video RAM. Controlled by our own Video Display
   Generator (VDG) array, this feature off-loads video work from the 128K system RAM, providing both analog and
   digital (IBM®-type RGB) outputs." So the video has its own copy of display memory, freeing main RAM for the CPU
-  at 2.3/3.6 MHz.
+  at 2.3/3.6 MHz. EX teardowns agree it's shadow RAM, most likely not user-accessible (see "Worth probing" below).
 - **The same ad** names the other custom arrays:
   - a "Memory Management Unit (MMU) array" controlling the 1 MB RAM board (256K × 1 DRAMs);
   - a "Universal Disk Controller (UDC) array" for 3.5" and 5.25" drives, with the EX/2 supporting IIGS-style
@@ -188,11 +188,17 @@ Not found:
 Open-Apple at reset fills memory with `$65` before the cold start, as on Apple machines.
 
 Worth probing:
-1. **The 128EX's extra 64K of video RAM** (Laser's 1988 ad). From 4.5 to 6.0, the only new soft switch the ROM
-   touches is `$C01E` (standard ALTCHARSET status). So the firmware never drives anything new in video. Either
-   the RAM is purely internal (for example letting the CPU run at 3.6 MHz while video reads its own copy), or
-   there are modes the ROM doesn't use. Probe: sweep the unused `$C0xx` switches on the EX in each video mode,
-   as DHGRTEST did on the original board.
+1. **The 128EX's extra 64K of video RAM: most likely shadow RAM, not user-accessible.** Published EX teardowns
+   agree it's **shadow video RAM**:
+   - writes to display memory are copied into it;
+   - the video circuitry reads its own copy;
+   - so the CPU can run at 2.3/3.6 MHz without waiting on video fetches.
+
+   That matches Laser's 1988 ad ("off-loads video work from the 128K system RAM"). It also matches the ROM: from
+   4.5 to 6.0 the only new soft switch it touches is `$C01E`, the standard ALTCHARSET status, so the firmware
+   never drives anything new in video. So this is probably not a source of hidden modes. A sweep of the unused
+   `$C0xx` switches on the EX (as DHGRTEST did on the original board) could still confirm it, but it's low
+   priority.
 2. **`$C060` bit 7 at reset:** if set, the ROM turns on `$C00B` (SLOTC3ROM). On a //c that bit is the 80/40
    switch; what drives it on a Laser is unknown. Probe: `PEEK(49248)` on each machine.
 3. **`$C074` (speed):** the documented values are `$00`, `$80`, `$C0`. The slot 5 firmware forces `$C0` around

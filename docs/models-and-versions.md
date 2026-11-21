@@ -178,3 +178,27 @@ Laser128EX-Expansion card project).
     EX/2's expansion slot is slot 5 (the EX's is slot 7).
   - 6.1's reset code differs from 6.0's. After the banner it selects slot 7, calls `$C71A`, then `$FEE0` (boot
     slot choice), then `JMP ($0000)`. It needs its own patch.
+
+## Possible undocumented features in 4.x–6.1 (survey, Nov 2026)
+Not found:
+- hidden reset keys: 4.x–6.1 only have the documented ones;
+- a self-test: no Closed-Apple check at reset;
+- hidden text or credits: the strings are only the copyright, configuration, memory test and boot messages.
+
+Open-Apple at reset fills memory with `$65` before the cold start, as on Apple machines.
+
+Worth probing:
+1. **The 128EX's extra 64K of video RAM** (Laser's 1988 ad). From 4.5 to 6.0, the only new soft switch the ROM
+   touches is `$C01E` (standard ALTCHARSET status). So the firmware never drives anything new in video. Either
+   the RAM is purely internal (for example letting the CPU run at 3.6 MHz while video reads its own copy), or
+   there are modes the ROM doesn't use. Probe: sweep the unused `$C0xx` switches on the EX in each video mode,
+   as DHGRTEST did on the original board.
+2. **`$C060` bit 7 at reset:** if set, the ROM turns on `$C00B` (SLOTC3ROM). On a //c that bit is the 80/40
+   switch; what drives it on a Laser is unknown. Probe: `PEEK(49248)` on each machine.
+3. **`$C074` (speed):** the documented values are `$00`, `$80`, `$C0`. The slot 5 firmware forces `$C0` around
+   RAM-disk access and restores the saved setting. Other bits are untested.
+4. **Where the EX/2 keeps its settings with the power off.** The only non-volatile hardware the ROM talks to is
+   the clock at `$C078`: index/data, with register `$0D` used as HOLD/BUSY. That's MSM6242-style, a 4-bit RTC
+   with no general RAM. How the Boot Slot and speed settings survive power-off is still to be traced. It might
+   show bytes that programs could use.
+5. **The UDC 3.5" controller registers** (`$C0E8–$C0EF`: `$C0EC`, `$C0ED` bit 7). See BMOW's article.

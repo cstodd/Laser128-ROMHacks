@@ -194,6 +194,16 @@ Worth probing:
    - the video circuitry reads its own copy;
    - so the CPU can run at 2.3/3.6 MHz without waiting on video fetches.
 
+   **Why it's needed:** an Apple II interleaves memory between the CPU (one half of each 1 MHz cycle) and the
+   video (the other half), so the RAM effectively runs at 2 MHz. Interleaving a 3.6 MHz CPU with video the same
+   way would need about 7.2 MHz RAM cycles (about 140 ns), beyond 1980s DRAM. With a shadow copy:
+   - main RAM serves only the CPU, at up to 3.6 MHz;
+   - display writes also go to the video RAM;
+   - the video reads its own copy at its own pace.
+
+   The Apple IIgs does the same in principle: fast RAM for the CPU, with display writes shadowed into slow RAM.
+   Whether the Laser briefly slows the CPU on display writes, as the IIgs does, isn't known.
+
    That matches Laser's 1988 ad ("off-loads video work from the 128K system RAM"). It also matches the ROM: from
    4.5 to 6.0 the only new soft switch it touches is `$C01E`, the standard ALTCHARSET status, so the firmware
    never drives anything new in video. So this is probably not a source of hidden modes. A sweep of the unused
